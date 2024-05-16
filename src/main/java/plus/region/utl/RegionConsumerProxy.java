@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 /**
  * Proxies accept of the function through itself to exclude repeated execution
+ * <p>
  * It is recommended to use it repeatedly to ensure better performance
  */
 public class RegionConsumerProxy implements Consumer<Region> {

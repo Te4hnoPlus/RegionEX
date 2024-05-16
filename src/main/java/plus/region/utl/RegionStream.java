@@ -9,6 +9,7 @@ import java.util.Iterator;
 
 /**
  * Reads regions from an input stream and writes them to an output stream
+ * <p>
  * It is recommended to use it repeatedly to ensure better performance
  */
 public class RegionStream implements Iterable<Region>, Iterator<Region> {
