@@ -26,7 +26,7 @@ public class RegionMap implements Iterable<Region>{
      * It is not recommended to use, {@link RegionMap#add(LIndexList, Region)}
      * @param region Region to add
      */
-    public void add(Region region) {
+    public void add(final Region region) {
         add(new LIndexList(), region);
     }
 
@@ -35,13 +35,12 @@ public class RegionMap implements Iterable<Region>{
      * @param list List of indexes to reuse
      * @param region Region to add
      */
-    public void add(LIndexList list, Region region) {
+    public void add(final LIndexList list, final Region region) {
         Region.computeIndexes(list, region);
         for (long l : list) {
-            RegionContainer prev = map.get(l);
-            RegionContainer newContainer = prev.addRegion(region);
+            final RegionContainer prev, cur = (prev = map.get(l)).addRegion(region);
 
-            if(newContainer != prev) map.put(l, newContainer);
+            if(cur != prev) map.put(l, cur);
         }
     }
 
@@ -50,7 +49,7 @@ public class RegionMap implements Iterable<Region>{
      * It is not recommended to use, {@link RegionMap#remove(LIndexList, Region)}
      * @param region Region to remove
      */
-    public void remove(Region region) {
+    public void remove(final Region region) {
         remove(new LIndexList(), region);
     }
 
@@ -59,15 +58,14 @@ public class RegionMap implements Iterable<Region>{
      * @param list List of indexes to reuse
      * @param region Region to remove
      */
-    public void remove(LIndexList list, Region region) {
+    public void remove(final LIndexList list, final Region region) {
         Region.computeIndexes(list, region);
         for (long l : list) {
-            RegionContainer prev = map.get(l);
-            RegionContainer newContainer = prev.removeRegion(region);
+            final RegionContainer prev, cur = (prev = map.get(l)).removeRegion(region);
 
-            if(newContainer != prev) {
-                if(newContainer == RegionContainer.EMPTY) map.remove(l);
-                else map.put(l, newContainer);
+            if(cur != prev) {
+                if(cur == RegionContainer.EMPTY) map.remove(l);
+                else map.put(l, cur);
             }
         }
     }
@@ -77,7 +75,7 @@ public class RegionMap implements Iterable<Region>{
      * Accept operation to all regions, use {@link RegionConsumerProxy}
      * @param func Consumer to accept
      */
-    public void acceptRegions(Consumer<Region> func){
+    public void acceptRegions(final Consumer<Region> func){
         acceptRegions(new RegionConsumerProxy(func));
     }
 
@@ -86,7 +84,7 @@ public class RegionMap implements Iterable<Region>{
      * Accept operation to all regions
      * @param func Consumer to accept
      */
-    public void acceptRegions(RegionConsumerProxy func){
+    public void acceptRegions(final RegionConsumerProxy func){
         for (Long2ObjectMap.Entry<RegionContainer> entry : map.long2ObjectEntrySet())
             entry.getValue().acceptRegions(func);
     }
@@ -96,7 +94,7 @@ public class RegionMap implements Iterable<Region>{
      * Finds all regions that contains XYZ point in query
      * @param query Query (maybe reused)
      */
-    public void getRegions(RegionQuery query){
+    public void getRegions(final RegionQuery query){
         query.clear();
         map.get(Region.calcIndex(query.getX(), query.getZ())).getRegions(query);
     }
@@ -109,7 +107,7 @@ public class RegionMap implements Iterable<Region>{
      * @param region Region to intersect
      * @param query Query (maybe reused)
      */
-    public void getRegions(Region region, RegionQuery query){
+    public void getRegions(final Region region, final RegionQuery query){
         getRegions(region, new LIndexList(), query);
     }
 
@@ -120,7 +118,7 @@ public class RegionMap implements Iterable<Region>{
      * @param list List of indexes to reuse
      * @param query Query (maybe reused)
      */
-    public void getRegions(Region region, LIndexList list,  RegionQuery query){
+    public void getRegions(final Region region, final LIndexList list, final RegionQuery query){
         query.clear();
         Region.computeIndexes(list, region);
         for (long l : list) map.get(l).getRegions(region, query);
@@ -135,7 +133,7 @@ public class RegionMap implements Iterable<Region>{
      * @param query Query (maybe reused)
      * @param func Consumer to accept
      */
-    public void acceptRegions(Region check, LIndexList list,  RegionQuery query, RegionConsumerProxy func){
+    public void acceptRegions(final Region check, final LIndexList list, final RegionQuery query, final RegionConsumerProxy func){
         acceptRegions(check, list, query, func.parent());
     }
 
@@ -147,7 +145,7 @@ public class RegionMap implements Iterable<Region>{
      * @param query Query (maybe reused)
      * @param func Consumer to accept
      */
-    public void acceptRegions(Region check, LIndexList list,  RegionQuery query, Consumer<Region> func){
+    public void acceptRegions(final Region check, final LIndexList list, final RegionQuery query, final Consumer<Region> func){
         getRegions(check, list, query);
         for (long l : list) map.get(l).getRegions(query);
         for (Region region : query) func.accept(region);

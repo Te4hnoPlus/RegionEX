@@ -31,7 +31,7 @@ public class RegionContainer implements Iterable<Region>{
      * Finds all regions that contains XYZ point in query, see {@link RegionMap#getRegions(RegionQuery)}
      * @param query Query (maybe reused)
      */
-    public void getRegions(RegionQuery query){}
+    public void getRegions(final RegionQuery query){}
 
 
     /**
@@ -39,7 +39,7 @@ public class RegionContainer implements Iterable<Region>{
      * @param region Region to intersect
      * @param query Query (maybe reused)
      */
-    public void getRegions(Region region, RegionQuery query){}
+    public void getRegions(final Region region, final RegionQuery query){}
 
 
     /**
@@ -47,7 +47,7 @@ public class RegionContainer implements Iterable<Region>{
      * @param region Region to add
      * @return New container if overflow or this
      */
-    public RegionContainer addRegion(Region region){
+    public RegionContainer addRegion(final Region region){
         return new SingleRegionContainer(region);
     }
 
@@ -57,7 +57,7 @@ public class RegionContainer implements Iterable<Region>{
      * @param region Region to remove
      * @return New container if possible or this
      */
-    public RegionContainer removeRegion(Region region){
+    public RegionContainer removeRegion(final Region region){
         return this;
     }
 
@@ -72,7 +72,7 @@ public class RegionContainer implements Iterable<Region>{
      * Accept this operation to all regions. Use {@link RegionConsumerProxy} to remove repeated execution
      * @param func Consumer to apply
      */
-    public void acceptRegions(Consumer<Region> func){}
+    public void acceptRegions(final Consumer<Region> func){}
 
 
     @Override

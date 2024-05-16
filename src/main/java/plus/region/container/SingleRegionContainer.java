@@ -22,27 +22,27 @@ public class SingleRegionContainer extends RegionContainer{
 
 
     @Override
-    public void getRegions(RegionQuery query) {
+    public void getRegions(final RegionQuery query) {
         if(region.contains(query.getX(), query.getY(), query.getZ()))
             query.addRegion(region);
     }
 
 
     @Override
-    public void getRegions(Region region, RegionQuery query) {
+    public void getRegions(final Region region, final RegionQuery query) {
         if(region.intersects(this.region))
             query.addRegion(region);
     }
 
 
     @Override
-    public RegionContainer addRegion(Region region) {
+    public RegionContainer addRegion(final Region region) {
         return new MultiRegionContainer(this.region, region);
     }
 
 
     @Override
-    public RegionContainer removeRegion(Region region) {
+    public RegionContainer removeRegion(final Region region) {
         return RegionContainer.EMPTY;
     }
 
@@ -54,7 +54,7 @@ public class SingleRegionContainer extends RegionContainer{
 
 
     @Override
-    public void acceptRegions(Consumer<Region> func) {
+    public void acceptRegions(final Consumer<Region> func) {
         func.accept(region);
     }
 

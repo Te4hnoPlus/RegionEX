@@ -14,18 +14,18 @@ public class RegionConsumerProxy implements Consumer<Region> {
     private final IntOpenHashSet set;
     private Consumer<Region> parent;
 
-    public RegionConsumerProxy(Consumer<Region> parent) {
+    public RegionConsumerProxy(final Consumer<Region> parent) {
         this.parent = parent;
         set = new IntOpenHashSet();
     }
 
-    public RegionConsumerProxy(IntOpenHashSet set, Consumer<Region> parent) {
+    public RegionConsumerProxy(final IntOpenHashSet set, final Consumer<Region> parent) {
         this.set = set;
         this.parent = parent;
     }
 
 
-    public RegionConsumerProxy init(Consumer<Region> consumer) {
+    public RegionConsumerProxy init(final Consumer<Region> consumer) {
         this.set.clear();
         this.parent = consumer;
         return this;
@@ -44,7 +44,7 @@ public class RegionConsumerProxy implements Consumer<Region> {
      * Accept region if it is not accepted yet
      */
     @Override
-    public void accept(Region region) {
+    public void accept(final Region region) {
         if(set.add(region.id)) parent.accept(region);
     }
 }

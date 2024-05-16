@@ -32,17 +32,17 @@ public class RegionQuery implements Iterable<Region>{
     }
 
 
-    public int getX() {
+    public final int getX() {
         return x;
     }
 
 
-    public int getY() {
+    public final int getY() {
         return y;
     }
 
 
-    public int getZ() {
+    public final int getZ() {
         return z;
     }
 
@@ -51,7 +51,7 @@ public class RegionQuery implements Iterable<Region>{
      * Used only in RegionContainer
      * @param region the region to add
      */
-    public void addRegion(Region region){
+    public void addRegion(final Region region){
         if(!hasRegion(region.id)) {
             if (regions.length == size)
                 regions = Region.expand(regions, 4);
@@ -64,7 +64,7 @@ public class RegionQuery implements Iterable<Region>{
      * @param region the region to check
      * @return true if region exists
      */
-    public boolean hasRegion(Region region){
+    public boolean hasRegion(final Region region){
         return hasRegion(region.id);
     }
 
@@ -73,7 +73,7 @@ public class RegionQuery implements Iterable<Region>{
      * @param id ID of region
      * @return true if region exists
      */
-    public boolean hasRegion(int id){
+    public boolean hasRegion(final int id){
         for(int i = 0; i < size; i++) if(regions[i].id == id) return true;
         return false;
     }
@@ -83,7 +83,7 @@ public class RegionQuery implements Iterable<Region>{
      * @return Region at index
      * throws ArrayIndexOutOfBoundsException if index is out of bounds
      */
-    public Region getRegion(int index){
+    public Region getRegion(final int index){
         return regions[index];
     }
 

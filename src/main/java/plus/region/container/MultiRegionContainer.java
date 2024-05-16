@@ -22,7 +22,7 @@ public class MultiRegionContainer extends RegionContainer{
 
 
     @Override
-    public void getRegions(RegionQuery query) {
+    public void getRegions(final RegionQuery query) {
         for(Region region: regions)
             if(region.contains(query.getX(), query.getY(), query.getZ()))
                 query.addRegion(region);
@@ -30,14 +30,14 @@ public class MultiRegionContainer extends RegionContainer{
 
 
     @Override
-    public void getRegions(Region region, RegionQuery query) {
+    public void getRegions(final Region region, final RegionQuery query) {
         for (Region curRegion : regions)
             if(region.intersects(curRegion)) query.addRegion(region);
     }
 
 
     @Override
-    public RegionContainer addRegion(Region region) {
+    public RegionContainer addRegion(final Region region) {
         Region[] newRegions;
 
         if((newRegions = Region.expand(regions, region)).length > 4){
@@ -52,7 +52,7 @@ public class MultiRegionContainer extends RegionContainer{
 
 
     @Override
-    public RegionContainer removeRegion(Region region) {
+    public RegionContainer removeRegion(final Region region) {
         Region[] newRegions = new Region[regions.length - 1];
         int index = 0;
         boolean removed = false;
@@ -72,7 +72,7 @@ public class MultiRegionContainer extends RegionContainer{
 
 
     @Override
-    public void acceptRegions(Consumer<Region> func) {
+    public void acceptRegions(final Consumer<Region> func) {
         for (Region region : regions) func.accept(region);
     }
 

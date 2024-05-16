@@ -23,7 +23,7 @@ public class ChunkedRegionContainer extends RegionContainer{
     }
 
 
-    public ChunkedRegionContainer(Region... regions){
+    public ChunkedRegionContainer(final Region... regions){
         this();
         for (Region region : regions)
             for(int y = region.minY; y <= region.maxY; y+=16)
@@ -39,7 +39,7 @@ public class ChunkedRegionContainer extends RegionContainer{
 
 
     @Override
-    public RegionContainer addRegion(Region region) {
+    public RegionContainer addRegion(final Region region) {
         for(int y = region.minY; y <= region.maxY; y+=16)
             addToIndex(y >> 4, region);
         return this;
@@ -47,7 +47,7 @@ public class ChunkedRegionContainer extends RegionContainer{
 
 
     @Override
-    public RegionContainer removeRegion(Region region) {
+    public RegionContainer removeRegion(final Region region) {
         for(int y = region.minY; y <= region.maxY; y+=16)
             removeFromIndex(y >> 4, region);
 
@@ -63,8 +63,8 @@ public class ChunkedRegionContainer extends RegionContainer{
     }
 
 
-    private void removeFromIndex(int vertIndex, Region region){
-        Region[] curRegions = regions[vertIndex];
+    private void removeFromIndex(final int vertIndex, final Region region){
+        final Region[] curRegions = regions[vertIndex];
         if(curRegions.length == 1)
             if(curRegions[0].id == region.id) regions[vertIndex] = null;
         else {
@@ -87,8 +87,8 @@ public class ChunkedRegionContainer extends RegionContainer{
 
 
     @Override
-    public void getRegions(RegionQuery query) {
-        Region[] curRegions;
+    public void getRegions(final RegionQuery query) {
+        final Region[] curRegions;
         if((curRegions = regions[query.getY() >> 4]) != null)
             for(Region region: curRegions)
                 if(region.contains(query.getX(), query.getY(), query.getZ()))
@@ -97,8 +97,8 @@ public class ChunkedRegionContainer extends RegionContainer{
 
 
     @Override
-    public void getRegions(Region region, RegionQuery query) {
-        Region[] curRegions;
+    public void getRegions(final Region region, final RegionQuery query) {
+        final Region[] curRegions;
         if((curRegions = regions[query.getY() >> 4]) != null)
             for(Region curRegion: curRegions)
                 if(curRegion.intersects(region)) query.addRegion(curRegion);
@@ -115,7 +115,7 @@ public class ChunkedRegionContainer extends RegionContainer{
 
 
     @Override
-    public void acceptRegions(Consumer<Region> func) {
+    public void acceptRegions(final Consumer<Region> func) {
         for (Region[] curRegions : regions)
             if (curRegions != null) for (Region region : curRegions) func.accept(region);
     }
@@ -133,7 +133,7 @@ public class ChunkedRegionContainer extends RegionContainer{
         private Region[] curChunk;
         private Region next;
 
-        public Itr(Region[][] regions) {
+        public Itr(final Region[][] regions) {
             this.regions = regions;
             this.curChunk = regions[0];
 
@@ -145,20 +145,21 @@ public class ChunkedRegionContainer extends RegionContainer{
                 curChunk = regions[chunkIndex];
             }
 
-            next = curChunk == null?findNext():curChunk[0];
+            next = curChunk[0];
         }
 
 
-        private Region findNext() {
+        private void findNext() {
             if(curChunk.length == regionIndex){
                 for (;chunkIndex < regions.length;++chunkIndex)
                     if(regions[chunkIndex] != null){
                         regionIndex = 0;
-                        return regions[chunkIndex++][0];
+                        next = regions[chunkIndex++][0];
+                        return;
                     }
-                return null;
+
             } else
-                return curChunk[regionIndex++];
+                next = curChunk[regionIndex++];
         }
 
 
@@ -170,8 +171,8 @@ public class ChunkedRegionContainer extends RegionContainer{
 
         @Override
         public Region next() {
-            Region prev = next;
-            next = findNext();
+            final Region prev = next;
+            findNext();
             return prev;
         }
     }

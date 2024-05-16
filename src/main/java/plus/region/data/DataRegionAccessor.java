@@ -11,13 +11,13 @@ public class DataRegionAccessor extends DataAccessor implements DataAccessor.Acc
     private final Int2ObjectFunction<Object[]> manager;
     private Region region;
 
-    public DataRegionAccessor(Int2ObjectFunction<Object[]> manager) {
+    public DataRegionAccessor(final Int2ObjectFunction<Object[]> manager) {
         this.manager = manager;
         this.accessor = this;
     }
 
 
-    public void use(Region region) {
+    public void use(final Region region) {
         this.region = region;
         this.data = region.getData(manager);
     }
@@ -30,7 +30,7 @@ public class DataRegionAccessor extends DataAccessor implements DataAccessor.Acc
 
 
     @Override
-    public void set(Object[] value) {
+    public void set(final Object[] value) {
         region.setData(manager, value);
     }
 }

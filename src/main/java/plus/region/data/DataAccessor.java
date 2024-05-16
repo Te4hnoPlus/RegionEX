@@ -25,7 +25,7 @@ public class DataAccessor {
     /**
      * Use this accessor to access data
      */
-    public void use(Accessor accessor){
+    public void use(final Accessor accessor){
         this.data = (this.accessor = accessor).get();
     }
 
@@ -35,7 +35,7 @@ public class DataAccessor {
      * @param id Field ID
      * @param value new field value
      */
-    public void set(int id, Object value){
+    public void set(final int id, final Object value){
         if(data == null)
             accessor.set(data = new Object[id + 1]);
         else if(id >= data.length)
@@ -49,7 +49,7 @@ public class DataAccessor {
      * @param id Field ID
      * @return Field value
      */
-    public Object get(int id){
+    public Object get(final int id){
         return data == null || id >= data.length ? null : data[id];
     }
 
@@ -70,13 +70,13 @@ public class DataAccessor {
         private final DataAccessor parent;
         private final int id;
 
-        private Field(DataAccessor parent, int id){
+        private Field(final DataAccessor parent, final int id){
             this.parent = parent;
             this.id = id;
         }
 
 
-        public void set(T value){
+        public void set(final T value){
             parent.set(id, value);
         }
 

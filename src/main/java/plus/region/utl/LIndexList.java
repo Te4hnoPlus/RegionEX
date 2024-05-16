@@ -12,7 +12,7 @@ public class LIndexList implements Iterable<Long>{
     private long[] list;
     private int size;
 
-    public LIndexList(long[] list) {
+    public LIndexList(final long[] list) {
         this.list = list;
         this.size = list.length;
     }
@@ -23,7 +23,7 @@ public class LIndexList implements Iterable<Long>{
     }
 
 
-    public LIndexList(int size) {
+    public LIndexList(final int size) {
         this.list = new long[size];
         this.size = 0;
     }
@@ -49,12 +49,12 @@ public class LIndexList implements Iterable<Long>{
      * @return long at index
      * throws IndexOutOfBoundsException if the index is out of range
      */
-    public long get(int index) {
+    public long get(final int index) {
         return list[index];
     }
 
 
-    public void add(long value) {
+    public void add(final long value) {
         if(size == list.length) {
             long[] newList = new long[list.length + 8];
             System.arraycopy(list, 0, newList, 0, list.length);
