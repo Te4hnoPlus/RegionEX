@@ -65,7 +65,10 @@ public class RegionMap implements Iterable<Region>{
             RegionContainer prev = map.get(l);
             RegionContainer newContainer = prev.removeRegion(region);
 
-            if(newContainer != prev) map.put(l, newContainer);
+            if(newContainer != prev) {
+                if(newContainer == RegionContainer.EMPTY) map.remove(l);
+                else map.put(l, newContainer);
+            }
         }
     }
 
