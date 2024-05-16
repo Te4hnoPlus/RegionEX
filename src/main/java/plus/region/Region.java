@@ -114,4 +114,14 @@ public class Region {
             }
         }
     }
+
+
+    @Override
+    public String toString() {
+        return "Region{" +
+                "ID = " + id + (data == null ? ", [" : ", cached, [") +
+                    minX + ", " + minY + ", " + minZ + "] -> ["
+                + maxX + ", " + maxY + ", " + maxZ +
+                "]}";
+    }
 }

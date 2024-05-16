@@ -12,7 +12,7 @@ import java.util.function.Consumer;
  * Base data structure for storing all regions
  */
 public class RegionMap{
-    private final Long2ObjectOpenHashMap<RegionContainer> map = new Long2ObjectOpenHashMap<>();
+    protected final Long2ObjectOpenHashMap<RegionContainer> map = new Long2ObjectOpenHashMap<>();
 
     public RegionMap() {
         map.defaultReturnValue(RegionContainer.EMPTY);
