@@ -30,7 +30,7 @@ public class TestAccess {
     }
 
 
-    static class Adapter extends DataRegionAccessor {
+    public static class Adapter extends DataRegionAccessor {
         public final Field<String> name = newField();
         public final Field<Integer> age = newField();
 

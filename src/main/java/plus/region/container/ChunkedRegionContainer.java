@@ -67,7 +67,7 @@ public class ChunkedRegionContainer extends RegionContainer{
             Region[] curRegion = regions[index];
 
             Region[] newRegions = new Region[curRegion.length + 1];
-            System.arraycopy(regions, 0, newRegions, 0, curRegion.length);
+            System.arraycopy(curRegion, 0, newRegions, 0, curRegion.length);
             newRegions[newRegions.length - 1] = region;
 
             regions[index] = newRegions;
@@ -151,21 +151,29 @@ public class ChunkedRegionContainer extends RegionContainer{
         public Itr(Region[][] regions) {
             this.regions = regions;
             this.curChunk = regions[0];
+            while (curChunk == null){
+                if(++chunkIndex >= regions.length) {
+                    next = null;
+                    return;
+                }
+                curChunk = regions[chunkIndex];
+            }
+
             next = curChunk == null?findNext():curChunk[0];
         }
 
 
         private Region findNext() {
-            if(curChunk.length == ++regionIndex){
+            if(curChunk.length == regionIndex){
                 for (;chunkIndex < regions.length;++chunkIndex){
                     if(regions[chunkIndex] != null){
                         regionIndex = 0;
-                        return regions[chunkIndex][0];
+                        return regions[chunkIndex++][0];
                     }
                 }
                 return null;
             } else {
-                return curChunk[regionIndex];
+                return curChunk[regionIndex++];
             }
         }
 

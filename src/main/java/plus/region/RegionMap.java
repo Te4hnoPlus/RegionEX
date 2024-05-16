@@ -1,17 +1,20 @@
 package plus.region;
 
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import plus.region.container.RegionContainer;
 import plus.region.utl.LIndexList;
 import plus.region.utl.RegionConsumerProxy;
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 
 /**
  * Base data structure for storing all regions
  */
-public class RegionMap{
+public class RegionMap implements Iterable<Region>{
     protected final Long2ObjectOpenHashMap<RegionContainer> map = new Long2ObjectOpenHashMap<>();
 
     public RegionMap() {
@@ -145,5 +148,61 @@ public class RegionMap{
         getRegions(check, list, query);
         for (long l : list) map.get(l).getRegions(query);
         for (Region region : query) func.accept(region);
+    }
+
+
+    public Iterator<Region> iterator(){
+        return new Itr(new IntOpenHashSet(), this);
+    }
+
+
+    public static class Itr implements Iterator<Region> {
+        private final ObjectIterator<Long2ObjectMap.Entry<RegionContainer>> iter;
+        private final IntOpenHashSet set;
+        private Iterator<Region> subItr = RegionContainer.EMPTY_ITERATOR;
+        private Region next;
+
+        public Itr(IntOpenHashSet set, RegionMap map) {
+            this.set = set;
+            iter = map.map.long2ObjectEntrySet().fastIterator();
+            while (!subItr.hasNext())
+                subItr = iter.next().getValue().iterator();
+            next = calcNext();
+        }
+
+
+        @Override
+        public boolean hasNext() {
+            return next != null;
+        }
+
+
+        private Region calcNext(){
+            Region next = subItr.next();
+
+            while (!set.add(next.id)){
+                while(!subItr.hasNext()){
+                    if(iter.hasNext())
+                        subItr = iter.next().getValue().iterator();
+                    else return null;
+                }
+                next = subItr.next();
+            }
+
+            while(!subItr.hasNext()){
+                if(iter.hasNext())
+                    subItr = iter.next().getValue().iterator();
+                else return null;
+            }
+            return next;
+        }
+
+
+        @Override
+        public Region next() {
+            Region prev = next;
+            next = calcNext();
+            return prev;
+        }
     }
 }

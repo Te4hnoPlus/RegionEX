@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * Contains a list of regions, used only in {@link plus.region.RegionMap}
  */
 public class RegionContainer implements Iterable<Region>{
-    private static final Iterator<Region> EMPTY_ITERATOR = new Iterator<Region>() {
+    public static final Iterator<Region> EMPTY_ITERATOR = new Iterator<Region>() {
         @Override
         public boolean hasNext() {
             return false;

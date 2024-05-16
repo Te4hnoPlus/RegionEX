@@ -37,7 +37,7 @@ public class DataAccessor {
      */
     public void set(int id, Object value){
         if(data == null)
-            data = new Object[id + 1];
+            accessor.set(data = new Object[id + 1]);
         else if(id >= data.length)
             accessor.set(data = Arrays.copyOf(data, id + 1));
         this.data[id] = value;
@@ -50,7 +50,7 @@ public class DataAccessor {
      * @return Field value
      */
     public Object get(int id){
-        return id >= data.length ? null : data[id];
+        return data == null || id >= data.length ? null : data[id];
     }
 
 

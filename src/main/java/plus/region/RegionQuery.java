@@ -98,6 +98,14 @@ public class RegionQuery implements Iterable<Region>{
 
 
     /**
+     * @return true if there are no regions
+     */
+    public boolean isEmpty(){
+        return size == 0;
+    }
+
+
+    /**
      * Reset RegionQuery state
      */
     public void clear(){
