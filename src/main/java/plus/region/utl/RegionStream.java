@@ -20,7 +20,7 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
      * Restart iterator
      * @param stream the input stream to read from
      */
-    public RegionStream start(InputStream stream) {
+    public RegionStream start(final InputStream stream) {
         this.stream = stream;
         next();
         return this;
@@ -40,16 +40,16 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
 
     @Override
     public Region next() {
-        InputStream stream = this.stream;
-        Region prev = next;
+        final InputStream stream = this.stream;
+        final Region prev = next;
         try {
             next = new Region(
                     readInt(stream), //id
                     readInt(stream), //min x
-                    readInt(stream), //min y
+                    stream.read(),   //min y
                     readInt(stream), //min z
                     readInt(stream), //max x
-                    readInt(stream), //max y
+                    stream.read(),   //max y
                     readInt(stream)  //max z
             );
         } catch (IOException e) {
@@ -65,7 +65,7 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
      * @param stream the input stream to read from
      * @return Iterator of regions
      */
-    public static RegionStream read(InputStream stream) {
+    public static RegionStream read(final InputStream stream) {
         return new RegionStream().start(stream);
     }
 
@@ -74,16 +74,16 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
      * @param stream the output stream to write to
      * @param regions the regions iterator to write
      */
-    public static void write(OutputStream stream, Iterator<Region> regions) {
-        byte[] arr = new byte[4];
+    public static void write(final OutputStream stream, final Iterator<Region> regions) {
+        final byte[] arr = new byte[4];
         while (regions.hasNext()) try {
             Region region = regions.next();
             write(stream, region.id,   arr); //id
             write(stream, region.minX, arr); //min x
-            write(stream, region.minY, arr); //min y
+            stream.write(region.minY);       //min y
             write(stream, region.minZ, arr); //min z
             write(stream, region.maxX, arr); //max x
-            write(stream, region.maxY, arr); //max y
+            stream.write(region.maxY);       //max y
             write(stream, region.maxZ, arr); //max z
         } catch (IOException e) {
             return;
@@ -91,7 +91,7 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
     }
 
 
-    private static void write(OutputStream stream, int value, byte[] temp) throws IOException {
+    private static void write(final OutputStream stream, final int value, final byte[] temp) throws IOException {
         codeInt(value, temp);
         stream.write(temp);
     }
@@ -100,7 +100,7 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
     /**
      * Code int to temporal byte array
      */
-    public static void codeInt(int value, byte[] temp){
+    public static void codeInt(final int value, final byte[] temp){
         temp[0] = (byte) ((value >> 24) & 0xFF);
         temp[1] = (byte) ((value >> 16) & 0xFF);
         temp[2] = (byte) ((value >> 8) & 0xFF);
@@ -114,7 +114,7 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
      * @throws IOException if read fails
      * @throws FastExitException on end of stream
      */
-    public static int readInt(InputStream stream) throws IOException, FastExitException{
+    public static int readInt(final InputStream stream) throws IOException, FastExitException{
         int first = stream.read();
         if(first == -1) throw FastExitException.INSTANCE;
         int second = stream.read();

@@ -4,7 +4,7 @@ package plus.region.utl;
 /**
  * Use this to fast throw an exception
  */
-public class FastExitException extends Exception{
+public final class FastExitException extends Exception{
     private final StackTraceElement[] EMPTY = new StackTraceElement[0];
     public static FastExitException INSTANCE = new FastExitException();
 
