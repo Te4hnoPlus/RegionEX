@@ -25,11 +25,9 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     public ChunkedRegionContainer(Region... regions){
         this();
-        for (Region region : regions) {
-            for(int y = region.minY; y <= region.maxY; y+=16){
+        for (Region region : regions)
+            for(int y = region.minY; y <= region.maxY; y+=16)
                 addToIndex(y >> 4, region);
-            }
-        }
     }
 
 
@@ -61,25 +59,15 @@ public class ChunkedRegionContainer extends RegionContainer{
 
 
     private void addToIndex(int index, Region region){
-        if(regions[index] == null){
-            regions[index] = new Region[]{region};
-        } else {
-            Region[] curRegion = regions[index];
-
-            Region[] newRegions = new Region[curRegion.length + 1];
-            System.arraycopy(curRegion, 0, newRegions, 0, curRegion.length);
-            newRegions[newRegions.length - 1] = region;
-
-            regions[index] = newRegions;
-        }
+        regions[index] = regions[index] == null ? new Region[]{region} : Region.expand(regions[index], region);
     }
 
 
     private void removeFromIndex(int vertIndex, Region region){
         Region[] curRegions = regions[vertIndex];
-        if(curRegions.length == 1){
+        if(curRegions.length == 1)
             if(curRegions[0].id == region.id) regions[vertIndex] = null;
-        } else {
+        else {
             Region[] newRegions = new Region[curRegions.length - 1];
             int index = 0;
             boolean removed = false;
@@ -120,11 +108,8 @@ public class ChunkedRegionContainer extends RegionContainer{
     @Override
     public int size() {
         int count = 0;
-
-        for (Region[] curRegions : regions) {
-            if (curRegions != null)
-                count += curRegions.length;
-        }
+        for (Region[] curRegions : regions)
+            if (curRegions != null) count += curRegions.length;
         return count;
     }
 
@@ -151,6 +136,7 @@ public class ChunkedRegionContainer extends RegionContainer{
         public Itr(Region[][] regions) {
             this.regions = regions;
             this.curChunk = regions[0];
+
             while (curChunk == null){
                 if(++chunkIndex >= regions.length) {
                     next = null;
@@ -165,16 +151,14 @@ public class ChunkedRegionContainer extends RegionContainer{
 
         private Region findNext() {
             if(curChunk.length == regionIndex){
-                for (;chunkIndex < regions.length;++chunkIndex){
+                for (;chunkIndex < regions.length;++chunkIndex)
                     if(regions[chunkIndex] != null){
                         regionIndex = 0;
                         return regions[chunkIndex++][0];
                     }
-                }
                 return null;
-            } else {
+            } else
                 return curChunk[regionIndex++];
-            }
         }
 
 

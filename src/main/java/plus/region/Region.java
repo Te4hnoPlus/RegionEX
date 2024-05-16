@@ -126,6 +126,30 @@ public class Region {
     }
 
 
+    /**
+     * Fast alternative to {@link java.util.Arrays#copyOf(Object[], int)}
+     * @param regions Array to expand
+     * @param region Region to add
+     * @return expanded array
+     */
+    public static Region[] expand(Region[] regions, Region region){
+        Region[] newRegions = new Region[regions.length + 1];
+        System.arraycopy(regions, 0, newRegions, 0, regions.length);
+        newRegions[regions.length] = region;
+        return newRegions;
+    }
+
+
+    /**
+     * See {@link #expand(Region[], Region)}
+     */
+    public static Region[] expand(Region[] regions, int addSize){
+        Region[] newRegions = new Region[regions.length + addSize];
+        System.arraycopy(regions, 0, newRegions, 0, regions.length);
+        return newRegions;
+    }
+
+
     @Override
     public String toString() {
         return "Region{" +

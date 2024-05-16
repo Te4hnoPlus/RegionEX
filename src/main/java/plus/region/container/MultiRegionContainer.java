@@ -23,29 +23,24 @@ public class MultiRegionContainer extends RegionContainer{
 
     @Override
     public void getRegions(RegionQuery query) {
-        for(Region region: regions) {
-            if(region.contains(query.getX(), query.getY(), query.getZ())) {
+        for(Region region: regions)
+            if(region.contains(query.getX(), query.getY(), query.getZ()))
                 query.addRegion(region);
-            }
-        }
     }
 
 
     @Override
     public void getRegions(Region region, RegionQuery query) {
-        for (Region curRegion : regions) {
+        for (Region curRegion : regions)
             if(region.intersects(curRegion)) query.addRegion(region);
-        }
     }
 
 
     @Override
     public RegionContainer addRegion(Region region) {
-        Region[] newRegions = new Region[regions.length + 1];
-        System.arraycopy(regions, 0, newRegions, 0, regions.length);
-        newRegions[newRegions.length - 1] = region;
+        Region[] newRegions;
 
-        if(newRegions.length > 4){
+        if((newRegions = Region.expand(regions, region)).length > 4){
             ChunkedRegionContainer container = new ChunkedRegionContainer(newRegions);
             if(container.countChunks() == 1)return this;
             return container;
@@ -68,9 +63,9 @@ public class MultiRegionContainer extends RegionContainer{
             }
             newRegions[index++] = r;
         }
-        if(removed){
+        if(removed)
             if(newRegions.length == 1) return new SingleRegionContainer(newRegions[0]);
-        }
+
         regions = newRegions;
         return this;
     }

@@ -53,9 +53,8 @@ public class RegionQuery implements Iterable<Region>{
      */
     public void addRegion(Region region){
         if(!hasRegion(region.id)) {
-            if (regions.length == size) {
-                regions = Arrays.copyOf(regions, size + 4);
-            }
+            if (regions.length == size)
+                regions = Region.expand(regions, 4);
             regions[size++] = region;
         }
     }
