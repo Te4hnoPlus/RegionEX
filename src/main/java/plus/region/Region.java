@@ -61,6 +61,12 @@ public class Region {
     }
 
 
+    public <T> void setData(Int2ObjectFunction<T> manager, T value) {
+        this.data = value;
+        manager.put(id, value);
+    }
+
+
     /**
      * It is assumed that regions with the same ID are equal
      */
