@@ -14,16 +14,27 @@ public class DataAccessor {
     public DataAccessor(){}
 
 
+    /**
+     * Create new field. It is recommended to use strictly inside your accessor
+     */
     public <T> Field<T> newField(){
         return new Field<>(this, id++);
     }
 
 
+    /**
+     * Use this accessor to access data
+     */
     public void use(Accessor accessor){
         this.data = (this.accessor = accessor).get();
     }
 
 
+    /**
+     * Edit field value
+     * @param id Field ID
+     * @param value new field value
+     */
     public void set(int id, Object value){
         if(data == null)
             data = new Object[id + 1];
@@ -33,17 +44,28 @@ public class DataAccessor {
     }
 
 
+    /**
+     * Get field value
+     * @param id Field ID
+     * @return Field value
+     */
     public Object get(int id){
         return id >= data.length ? null : data[id];
     }
 
 
+    /**
+     * Abstract Object[] accessor
+     */
     public interface Accessor{
         Object[] get();
         void set(Object[] value);
     }
 
 
+    /**
+     * Final field to access to data by ID
+     */
     public static final class Field<T>{
         private final DataAccessor parent;
         private final int id;

@@ -61,6 +61,10 @@ public class Region {
     }
 
 
+    /**
+     * @param manager Data manager ID -> data
+     * @param value new region data
+     */
     public <T> void setData(Int2ObjectFunction<T> manager, T value) {
         this.data = value;
         manager.put(id, value);
