@@ -37,10 +37,11 @@ public class RegionMap implements Iterable<Region>{
      */
     public void add(final LIndexList list, final Region region) {
         Region.computeIndexes(list, region);
-        for (long l : list) {
-            final RegionContainer prev, cur = (prev = map.get(l)).addRegion(region);
-
-            if(cur != prev) map.put(l, cur);
+        LIndexList.Itr itr = list.iterator();
+        long index;
+        while (itr.hasNext()) {
+            final RegionContainer prev, cur = (prev = map.get(index = itr.nextLong())).addRegion(region);
+            if(cur != prev) map.put(index, cur);
         }
     }
 
@@ -60,12 +61,14 @@ public class RegionMap implements Iterable<Region>{
      */
     public void remove(final LIndexList list, final Region region) {
         Region.computeIndexes(list, region);
-        for (long l : list) {
-            final RegionContainer prev, cur = (prev = map.get(l)).removeRegion(region);
+        LIndexList.Itr itr = list.iterator();
+        long index;
+        while (itr.hasNext()) {
+            final RegionContainer prev, cur = (prev = map.get(index = itr.nextLong())).removeRegion(region);
 
             if(cur != prev) {
-                if(cur == RegionContainer.EMPTY) map.remove(l);
-                else map.put(l, cur);
+                if(cur == RegionContainer.EMPTY) map.remove(index);
+                else map.put(index, cur);
             }
         }
     }
@@ -121,7 +124,8 @@ public class RegionMap implements Iterable<Region>{
     public void getRegions(final Region region, final LIndexList list, final RegionQuery query){
         query.clear();
         Region.computeIndexes(list, region);
-        for (long l : list) map.get(l).getRegions(region, query);
+        LIndexList.Itr itr = list.iterator();
+        while (itr.hasNext()) map.get(itr.nextLong()).getRegions(region, query);
     }
 
 
@@ -147,7 +151,8 @@ public class RegionMap implements Iterable<Region>{
      */
     public void acceptRegions(final Region check, final LIndexList list, final RegionQuery query, final Consumer<Region> func){
         getRegions(check, list, query);
-        for (long l : list) map.get(l).getRegions(query);
+        LIndexList.Itr itr = list.iterator();
+        while (itr.hasNext()) map.get(itr.nextLong()).getRegions(query);
         for (Region region : query) func.accept(region);
     }
 

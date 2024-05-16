@@ -26,6 +26,7 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
         return this;
     }
 
+
     @Override
     public Iterator<Region> iterator() {
         return this;
