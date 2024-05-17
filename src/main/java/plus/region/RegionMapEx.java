@@ -2,6 +2,7 @@ package plus.region;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import plus.region.data.RegionStream;
+import plus.region.utl.CLIndexList;
 import plus.region.utl.LIndexList;
 import java.io.File;
 import java.util.concurrent.Executor;
@@ -39,7 +40,7 @@ public class RegionMapEx extends RegionMap {
             if(!loadedGeo.contains(geoIndex)){
                 loadedGeo.add(geoIndex);
 
-                if(temp == null) temp = itr.hasNext()? new LIndexList() : list;
+                if(temp == null) temp = itr.hasNext()? new CLIndexList() : list;
 
                 RegionStream toAdd = RegionStream.readGeo(geoIndex, geoDir);
 
@@ -64,6 +65,18 @@ public class RegionMapEx extends RegionMap {
      * @param region check region
      */
     public void ensureLoaded(final LIndexList list, final Region region){
+        list.clear();
+        Region.computeGeoIndexes(list, region);
+        ensureLoadedGeo(list.iterator(), list);
+    }
+
+
+    /**
+     * Handle modify regions
+     * @param list List of indexes to reuse
+     * @param region check region
+     */
+    protected void onModify(final LIndexList list, final Region region){
         list.clear();
         Region.computeGeoIndexes(list, region);
         LIndexList.Itr itr = list.iterator();
@@ -97,14 +110,14 @@ public class RegionMapEx extends RegionMap {
 
     @Override
     public void add(final LIndexList list, final Region region) {
-        ensureLoaded(list, region);
+        onModify(list, region);
         super.add(list, region);
     }
 
 
     @Override
     public void remove(final LIndexList list, final Region region) {
-        ensureLoaded(list, region);
+        onModify(list, region);
         super.remove(list, region);
     }
 
