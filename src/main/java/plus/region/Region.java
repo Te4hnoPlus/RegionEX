@@ -105,7 +105,9 @@ public class Region {
 
 
     /**
-     * @return Horizontal index of point (x, z)
+     * @return Horizontal chunk (16 x 16) index of point (x, z)
+     * @param x block x
+     * @param z block z
      */
     public static long calcIndex(final int x, final int z){
         return (long)(x & 0xFFFFFFF0) << 32 | (z & 0xFFFFFFF0);
@@ -113,14 +115,36 @@ public class Region {
 
 
     /**
+     * @param x block x
+     * @param z block z
+     * @return Horizontal geo (1024 x 1024) index
+     */
+    public static long calcGeoIndex(final int x, final int z) {
+        return (long)(x & 0xFFFFF400) << 32 | (z & 0xFFFFF400);
+    }
+
+
+    /**
      * @param list List indexes to reuse/fill
-     * @param region Region to calculate horizontal indexes
+     * @param region Region to calculate horizontal chunk (16 x 16) indexes
      */
     public static void computeIndexes(final LIndexList list, final Region region){
         list.clear();
         for(int x = region.minX; x <= region.maxX; x+=16)
             for(int z = region.minZ; z <= region.maxZ; z+=16)
                 list.add(calcIndex(x, z));
+    }
+
+
+    /**
+     * @param list List indexes to reuse/fill
+     * @param region Region to calculate horizontal geo (1024 x 1024) indexes
+     */
+    public static void computeGeoIndexes(final LIndexList list, final Region region) {
+        list.clear();
+        for (int x = region.minX; x <= region.maxX; x += 1024)
+            for (int z = region.minZ; z <= region.maxZ; z += 1024)
+                list.add(calcGeoIndex(x, z));
     }
 
 

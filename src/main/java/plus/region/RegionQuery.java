@@ -9,10 +9,12 @@ import java.util.Iterator;
  * It is recommended to use it repeatedly to ensure better performance
  * <p>
  * XYZ - point, in which to search for regions
+ * <p>
+ * For large area, use {@link LargeRegionQuery}
  */
 public class RegionQuery implements Iterable<Region>{
     private static final Region[] EMPTY = new Region[0];
-    private Region[] regions = EMPTY;
+    protected Region[] regions = EMPTY;
     private int x, y, z, size;
 
     public RegionQuery(){}
@@ -57,6 +59,17 @@ public class RegionQuery implements Iterable<Region>{
                 regions = Region.expand(regions, 4);
             regions[size++] = region;
         }
+    }
+
+
+    /**
+     * Add region ignoring duplicates
+     * @param region the region to add
+     */
+    public void add(final Region region){
+        if (regions.length == size)
+            regions = Region.expand(regions, 4);
+        regions[size++] = region;
     }
 
 

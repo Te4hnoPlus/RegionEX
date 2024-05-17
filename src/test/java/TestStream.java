@@ -1,6 +1,6 @@
 import plus.region.Region;
 import plus.region.RegionQuery;
-import plus.region.utl.RegionStream;
+import plus.region.data.RegionStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

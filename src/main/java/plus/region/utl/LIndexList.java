@@ -65,6 +65,24 @@ public class LIndexList implements Iterable<Long>{
     }
 
 
+    /**
+     * Replace first long equal to last element and trim size
+     */
+    public void removeSwap(long value) {
+        int i = 0, s;
+        if((s = size) == 0) return;
+        if(s == 1) {
+            --size;
+            return;
+        }
+        for(long[] list = this.list; i < s; i++)
+            if(list[i] == value) {
+                list[i] = list[--size];
+                return;
+            }
+    }
+
+
     @Override
     public Itr iterator() {
         return new Itr(this);

@@ -1,9 +1,8 @@
-package plus.region.utl;
+package plus.region.data;
 
 import plus.region.Region;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import plus.region.utl.FastExitException;
+import java.io.*;
 import java.util.Iterator;
 
 
@@ -44,21 +43,81 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
         final InputStream stream = this.stream;
         final Region prev = next;
         try {
-            next = new Region(
-                    readInt(stream), //id
-                    readInt(stream), //min x
-                    stream.read(),   //min y (0-255)
-                    readInt(stream), //min z
-                    readInt(stream), //max x
-                    stream.read(),   //max y (0-255)
-                    readInt(stream)  //max z
-            );
+            next = read1(stream);
         } catch (IOException e) {
+            try {
+                stream.close();
+            } catch (IOException ex) {}
             throw new RuntimeException(e);
         } catch (FastExitException e) {
             next = null;
+            try {
+                stream.close();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
         return prev;
+    }
+
+
+    public void close() throws IOException {
+        stream.close();
+    }
+
+
+    public static Region read1(final InputStream stream) throws FastExitException, IOException {
+        return new Region(
+                readInt(stream), //id
+                readInt(stream), //min x
+                stream.read(),   //min y (0-255)
+                readInt(stream), //min z
+                readInt(stream), //max x
+                stream.read(),   //max y (0-255)
+                readInt(stream)  //max z
+        );
+    }
+
+
+    public static RegionStream readGeo(long id, final File geoDir){
+        File file = new File(geoDir, id + ".geo");
+        RegionStream stream = new RegionStream();
+        if(!file.exists())return stream;
+
+        FileInputStream os;
+        try {
+            os = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return stream.start(os);
+    }
+
+
+    public static void writeGeo(long id, final File geoDir, Iterator<Region> regions){
+        File file = new File(geoDir, id + ".geo");
+        if(!file.exists())return;
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(file);
+
+            write(os, regions);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if(os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
 
