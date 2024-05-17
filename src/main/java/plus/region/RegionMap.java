@@ -106,6 +106,8 @@ public class RegionMap implements Iterable<Region>{
     /**
      * Finds all regions that intersect with region
      * <p>
+     * For large area, use {@link LargeRegionQuery}
+     * <p>
      * It is not recommended to use, {@link RegionMap#getRegions(Region, LIndexList, RegionQuery)}
      * @param region Region to intersect
      * @param query Query (maybe reused)
@@ -117,6 +119,8 @@ public class RegionMap implements Iterable<Region>{
 
     /**
      * Finds all regions that intersect with region
+     * <p>
+     * For large area, use {@link LargeRegionQuery}
      * @param region Region to intersect
      * @param list List of indexes to reuse
      * @param query Query (maybe reused)
@@ -126,6 +130,29 @@ public class RegionMap implements Iterable<Region>{
         Region.computeIndexes(list, region);
         LIndexList.Itr itr = list.iterator();
         while (itr.hasNext()) map.get(itr.nextLong()).getRegions(region, query);
+    }
+
+
+    /**
+     * It is not recommended to use, {@link RegionMap#getRegionsAuto(Region, LIndexList)}
+     * @param region Region to intersect
+     * @return Effective completed query
+     */
+    public RegionQuery getRegionsAuto(final Region region) {
+        return getRegionsAuto(region, new LIndexList());
+    }
+
+
+    /**
+     * @param region Region to intersect
+     * @param list List of indexes to reuse
+     * @return Effective completed query
+     */
+    public RegionQuery getRegionsAuto(final Region region, final LIndexList list) {
+        int volume = region.volume();
+        RegionQuery query = volume > Region.EFFECTIVE_MAX_VOLUME ? new LargeRegionQuery() : new RegionQuery();
+        getRegions(region, list, query);
+        return query;
     }
 
 

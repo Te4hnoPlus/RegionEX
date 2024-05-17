@@ -12,6 +12,12 @@ import plus.region.utl.LIndexList;
  * data - Region data, linked with ID
  */
 public class Region {
+    public static final int EFFECTIVE_MAX_VOLUME = 131_071   ;
+    public static final int GEO_SIZE             = 1024      ;
+    public static final int CHUNK_SIZE           = 16        ;
+    public static final int CHUNK_MASK           = 0xFFFFFFF0;
+    public static final int GEO_MASK             = 0xFFFFF400;
+
     public final int id, minX, minY, minZ, maxX, maxY, maxZ;
     private Object data;
 
@@ -105,12 +111,20 @@ public class Region {
 
 
     /**
+     * @return Mathematical cuboid volume
+     */
+    public int volume() {
+        return (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
+    }
+
+
+    /**
      * @return Horizontal chunk (16 x 16) index of point (x, z)
      * @param x block x
      * @param z block z
      */
     public static long calcIndex(final int x, final int z){
-        return (long)(x & 0xFFFFFFF0) << 32 | (z & 0xFFFFFFF0);
+        return (long)(x & CHUNK_MASK) << 32 | (z & CHUNK_MASK);
     }
 
 
@@ -120,7 +134,7 @@ public class Region {
      * @return Horizontal geo (1024 x 1024) index
      */
     public static long calcGeoIndex(final int x, final int z) {
-        return (long)(x & 0xFFFFF400) << 32 | (z & 0xFFFFF400);
+        return (long)(x & GEO_MASK) << 32 | (z & GEO_MASK);
     }
 
 
@@ -130,8 +144,8 @@ public class Region {
      */
     public static void computeIndexes(final LIndexList list, final Region region){
         list.clear();
-        for(int x = region.minX; x <= region.maxX; x+=16)
-            for(int z = region.minZ; z <= region.maxZ; z+=16)
+        for(int x = region.minX; x <= region.maxX; x += CHUNK_SIZE)
+            for(int z = region.minZ; z <= region.maxZ; z += CHUNK_SIZE)
                 list.add(calcIndex(x, z));
     }
 
@@ -142,8 +156,8 @@ public class Region {
      */
     public static void computeGeoIndexes(final LIndexList list, final Region region) {
         list.clear();
-        for (int x = region.minX; x <= region.maxX; x += 1024)
-            for (int z = region.minZ; z <= region.maxZ; z += 1024)
+        for (int x = region.minX; x <= region.maxX; x += GEO_SIZE)
+            for (int z = region.minZ; z <= region.maxZ; z += GEO_SIZE)
                 list.add(calcGeoIndex(x, z));
     }
 
