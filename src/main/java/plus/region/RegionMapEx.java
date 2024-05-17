@@ -175,6 +175,7 @@ public class RegionMapEx extends RegionMap {
 
 
         public void editRegion(long geoIndex){
+            this.index = geoIndex;
             int startX = (int)(geoIndex >> 32) ;
             int startZ = (int)(geoIndex)       ;
 
