@@ -12,10 +12,10 @@ public class TestMap {
         TestAccess.Adapter adapter = new TestAccess.Adapter(manager);
 
         RegionMapEx map = new RegionMapEx(new File("data"));
-        map.ensureLoaded(new Region(-512, 0, -512, 1512, 0, 1512));
+        RegionMapEx.Context ctx = new RegionMapEx.Context(map);
+        ctx.ensureLoaded(-512, -512, 1512, 1512);
 
         int count = 0;
-        RegionMapEx.Context ctx = new RegionMapEx.Context(map);
 
         for (int i=0;i<1250;i+=37){
             int h = i % 50;
@@ -56,7 +56,7 @@ public class TestMap {
     public static void test2(){
         RegionMapEx map = new RegionMapEx(new File("data"));
         RegionMapEx.Context ctx = new RegionMapEx.Context(map);
-        ctx.ensureLoaded(new Region(-512, 0, -512, 1512, 0, 1512));
+        ctx.ensureLoaded(-512, -512, 1512, 1512);
 
         for (int i=40;i<60;i+=4){
             RegionQuery query = ctx.getRegions(12+i, 12+i, 12+i);
