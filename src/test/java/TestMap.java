@@ -12,7 +12,7 @@ public class TestMap {
         TestAccess.Adapter adapter = new TestAccess.Adapter(manager);
 
         RegionMapEx map = new RegionMapEx(new File("data"));
-        RegionMapEx.Context ctx = new RegionMapEx.Context(map);
+        RegionMapEx.Context ctx = map.newContext();
         ctx.ensureLoaded(-512, -512, 1512, 1512);
 
         int count = 0;
