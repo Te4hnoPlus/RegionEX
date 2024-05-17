@@ -1,6 +1,5 @@
 package plus.region;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 
@@ -18,14 +17,14 @@ public class RegionQuery implements Iterable<Region>{
 
     public RegionQuery(){}
 
-    public RegionQuery(int x, int y, int z){
+    public RegionQuery(final int x, final int y, final int z){
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
 
-    public RegionQuery init(int x, int y, int z){
+    public RegionQuery init(final int x, final int y, final int z){
         this.x = x;
         this.y = y;
         this.z = z;
@@ -109,9 +108,9 @@ public class RegionQuery implements Iterable<Region>{
      * Reset RegionQuery state
      */
     public void clear(){
-        if(size > 0) {
-            //need to work GC
-            Arrays.fill(regions, null);
+        int s;
+        if((s = size) > 0) {
+            for (Region[] regions = this.regions; s > 0; regions[--s] = null);
             size = 0;
         }
     }

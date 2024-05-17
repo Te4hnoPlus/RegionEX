@@ -56,8 +56,8 @@ public class LIndexList implements Iterable<Long>{
 
     public void add(final long value) {
         if(size == list.length) {
-            long[] newList = new long[list.length + 8];
-            System.arraycopy(list, 0, newList, 0, list.length);
+            long[] newList;
+            System.arraycopy(list, 0, newList = new long[size + 8], 0, size);
             list = newList;
         }
         list[size] = value;
@@ -80,7 +80,7 @@ public class LIndexList implements Iterable<Long>{
         private final LIndexList list;
         private int index;
 
-        public Itr(LIndexList list) {
+        public Itr(final LIndexList list) {
             this.list = list;
             this.index = 0;
         }

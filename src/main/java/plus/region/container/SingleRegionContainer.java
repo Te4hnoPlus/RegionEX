@@ -70,6 +70,7 @@ public class SingleRegionContainer extends RegionContainer{
      */
     public static class SingleItr implements Iterator<Region>{
         private Region region;
+
         public SingleItr(Region region) {
             this.region = region;
         }

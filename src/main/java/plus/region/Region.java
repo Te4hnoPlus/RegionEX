@@ -15,12 +15,12 @@ public class Region {
     public final int id, minX, minY, minZ, maxX, maxY, maxZ;
     private Object data;
 
-    public Region(int minX, int minY, int minZ, int maxX, int maxY, int maxZ){
+    public Region(final int minX, final int minY, final int minZ, final int maxX, final int maxY, final int maxZ){
         this(-1, minX, minY, minZ, maxX, maxY, maxZ);
     }
 
 
-    public Region(int id, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    public Region(final int id, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         this.id = id;
         if(minX > maxX){
             int temp = minX;
@@ -131,10 +131,10 @@ public class Region {
      * @return expanded array
      */
     public static Region[] expand(final Region[] regions, final Region region){
-        Region[] newRegions = new Region[regions.length + 1];
-        System.arraycopy(regions, 0, newRegions, 0, regions.length);
-        newRegions[regions.length] = region;
-        return newRegions;
+        Region[] result;
+        System.arraycopy(regions, 0, result = new Region[regions.length + 1], 0, regions.length);
+        result[regions.length] = region;
+        return result;
     }
 
 
@@ -142,9 +142,9 @@ public class Region {
      * See {@link #expand(Region[], Region)}
      */
     public static Region[] expand(final Region[] regions, final int addSize){
-        Region[] newRegions = new Region[regions.length + addSize];
-        System.arraycopy(regions, 0, newRegions, 0, regions.length);
-        return newRegions;
+        Region[] result;
+        System.arraycopy(regions, 0, result = new Region[regions.length + addSize], 0, regions.length);
+        return result;
     }
 
 

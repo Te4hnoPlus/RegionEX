@@ -47,10 +47,10 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
             next = new Region(
                     readInt(stream), //id
                     readInt(stream), //min x
-                    stream.read(),   //min y
+                    stream.read(),   //min y (0-255)
                     readInt(stream), //min z
                     readInt(stream), //max x
-                    stream.read(),   //max y
+                    stream.read(),   //max y (0-255)
                     readInt(stream)  //max z
             );
         } catch (IOException e) {
@@ -81,10 +81,10 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
             Region region = regions.next();
             write(stream, region.id,   arr); //id
             write(stream, region.minX, arr); //min x
-            stream.write(region.minY);       //min y
+            stream.write(region.minY);       //min y (0-255)
             write(stream, region.minZ, arr); //min z
             write(stream, region.maxX, arr); //max x
-            stream.write(region.maxY);       //max y
+            stream.write(region.maxY);       //max y (0-255)
             write(stream, region.maxZ, arr); //max z
         } catch (IOException e) {
             return;

@@ -16,7 +16,7 @@ public final class FastExitException extends Exception{
      * Ignore this to speedy
      */
     @Override
-    public  Throwable fillInStackTrace() {
+    public Throwable fillInStackTrace() {
         return this;
     }
 

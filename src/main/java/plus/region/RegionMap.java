@@ -157,6 +157,7 @@ public class RegionMap implements Iterable<Region>{
     }
 
 
+    @Override
     public Iterator<Region> iterator(){
         return new Itr(new IntOpenHashSet(), this);
     }
@@ -168,7 +169,7 @@ public class RegionMap implements Iterable<Region>{
         private Iterator<Region> subItr = RegionContainer.EMPTY_ITERATOR;
         private Region next;
 
-        public Itr(IntOpenHashSet set, RegionMap map) {
+        public Itr(final IntOpenHashSet set, final RegionMap map) {
             this.set = set;
             iter = map.map.long2ObjectEntrySet().fastIterator();
             while (!subItr.hasNext())

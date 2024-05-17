@@ -58,7 +58,7 @@ public class ChunkedRegionContainer extends RegionContainer{
     }
 
 
-    private void addToIndex(int index, Region region){
+    private void addToIndex(final int index, final Region region){
         regions[index] = regions[index] == null ? new Region[]{region} : Region.expand(regions[index], region);
     }
 
