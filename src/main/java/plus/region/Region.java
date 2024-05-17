@@ -163,6 +163,20 @@ public class Region {
 
 
     /**
+     * @param list List indexes to reuse/fill
+     * @param x min area x
+     * @param z min area z
+     * @param maxX max area x
+     * @param maxZ max area z
+     */
+    public static void computeGeoIndexes(final LIndexList list, int x, int z, final int maxX, final int maxZ) {
+        for (list.clear(); x <= maxX; x += GEO_SIZE)
+            for (; z <= maxZ; z += GEO_SIZE)
+                list.add(calcGeoIndex(x, z));
+    }
+
+
+    /**
      * Fast alternative to {@link java.util.Arrays#copyOf(Object[], int)}
      * @param regions Array to expand
      * @param region Region to add

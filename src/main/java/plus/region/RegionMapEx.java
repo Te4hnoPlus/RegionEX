@@ -23,7 +23,7 @@ public class RegionMapEx extends RegionMap {
     protected LongOpenHashSet dirtyGeo  = new LongOpenHashSet();
     protected final File geoDir;
 
-    public RegionMapEx(File geoDir) {
+    public RegionMapEx(final File geoDir) {
         if(geoDir.isFile())throw new IllegalArgumentException("Input file must be a directory");
         if(!geoDir.exists()){
             if(!geoDir.mkdirs())throw new IllegalArgumentException("Cannot create directory here");
@@ -32,7 +32,7 @@ public class RegionMapEx extends RegionMap {
     }
 
 
-    private void ensureLoadedGeo(LIndexList.Itr itr, LIndexList list){
+    private void ensureLoadedGeo(final LIndexList.Itr itr, final LIndexList list){
         itr.reset();
         LIndexList temp = null;
         while (itr.hasNext()){
@@ -47,6 +47,35 @@ public class RegionMapEx extends RegionMap {
                 while (toAdd.hasNext()) systemAdd(temp, toAdd.next());
             }
         }
+    }
+
+
+    /**
+     * Ensure that geo region for check area will be loaded
+     * <p>
+     * It is not recommended to use, {@link RegionMapEx#ensureLoaded(LIndexList, int, int, int, int)}
+     * @param minX min block x
+     * @param minZ min block z
+     * @param maxX max block x
+     * @param maxZ max block z
+     */
+    public void ensureLoaded(final int minX, final int minZ, final int maxX, final int maxZ){
+        ensureLoaded(new LIndexList(), minX, minZ, maxX, maxZ);
+    }
+
+
+    /**
+     * Ensure that geo region for check area will be loaded
+     * @param list List of indexes to reuse
+     * @param minX min block x
+     * @param minZ min block z
+     * @param maxX max block x
+     * @param maxZ max block z
+     */
+    public void ensureLoaded(final LIndexList list, final int minX, final int minZ, final int maxX, final int maxZ){
+        list.clear();
+        Region.computeGeoIndexes(list, minX, minZ, maxX, maxZ);
+        ensureLoadedGeo(list.iterator(), list);
     }
 
 
@@ -91,7 +120,7 @@ public class RegionMapEx extends RegionMap {
      * @param x block x
      * @param z block z
      */
-    public void ensureLoaded(int x, int z){
+    public void ensureLoaded(final int x, final int z){
         ensureLoaded(new LIndexList(), x, z);
     }
 
@@ -102,7 +131,7 @@ public class RegionMapEx extends RegionMap {
      * @param x block x
      * @param z block z
      */
-    public void ensureLoaded(LIndexList list, int x, int z){
+    public void ensureLoaded(final LIndexList list, final int x, final int z){
         list.add(Region.calcGeoIndex(x, z));
         ensureLoadedGeo(list.iterator(), list);
     }
@@ -127,7 +156,7 @@ public class RegionMapEx extends RegionMap {
      * @param list List of indexes to reuse
      * @param region region to add
      */
-    protected final void systemAdd(LIndexList list, Region region){
+    protected final void systemAdd(final LIndexList list, final Region region){
         super.add(list, region);
     }
 
@@ -137,7 +166,7 @@ public class RegionMapEx extends RegionMap {
      * @param list List of indexes to reuse
      * @param region region to remove
      */
-    protected final void systemRemove(LIndexList list, Region region){
+    protected final void systemRemove(final LIndexList list, final Region region){
         super.remove(list, region);
     }
 
@@ -173,21 +202,138 @@ public class RegionMapEx extends RegionMap {
 
 
     /**
+     * @return new context for this
+     */
+    public Context newContext() {
+        return new Context(this);
+    }
+
+
+    /**
+     * Context to effective access to {@link RegionMapEx}
+     */
+    public static class Context{
+        private final CLIndexList list = new CLIndexList();
+        private final RegionQuery query = new RegionQuery();
+        private final RegionMapEx map;
+
+        public Context(final RegionMapEx map) {
+            this.map = map;
+        }
+
+        /**
+         * @return Linked {@link RegionMapEx}
+         */
+        public final RegionMapEx map() {
+            return map;
+        }
+
+
+        /**
+         * Add region to map
+         * @param region region to add
+         */
+        public void add(final Region region) {
+            map.add(list, region);
+        }
+
+
+        /**
+         * Remove region from map
+         * @param region region to remove
+         */
+        public void remove(final Region region) {
+            map.remove(list, region);
+        }
+
+
+        /**
+         * Ensure that geo region for check region will be loaded, see {@link RegionMapEx#ensureLoaded(LIndexList, Region)}
+         * @param check check region
+         */
+        public void ensureLoaded(final Region check) {
+            map.ensureLoaded(list, check);
+        }
+
+
+        /**
+         * Ensure that geo region for check point will be loaded, see {@link RegionMapEx#ensureLoaded(LIndexList, int, int)}
+         * @param x block x
+         * @param z block z
+         */
+        public void ensureLoaded(final int x, final int z) {
+            map.ensureLoaded(list, x, z);
+        }
+
+
+        /**
+         * Ensure that geo region for check area will be loaded, see {@link RegionMapEx#ensureLoaded(LIndexList, int, int, int, int)}
+         * @param minX min block x
+         * @param minZ min block z
+         * @param maxX max block x
+         * @param maxZ max block z
+         */
+        public void ensureLoaded(final int minX, final int minZ, final int maxX, final int maxZ){
+            LIndexList list;
+            (list = this.list).clear();
+            Region.computeGeoIndexes(list, minX, minZ, maxX, maxZ);
+            map.ensureLoadedGeo(list.iterator(), list);
+        }
+
+
+        /**
+         * @param x block x
+         * @param y block y
+         * @param z block z
+         * @return Completed pooled query with all regions in ZYX point, see {@link RegionMap#getRegions(RegionQuery)}
+         */
+        public RegionQuery getRegions(final int x, final int y, final int z) {
+            RegionQuery query;
+            map.getRegions(query = this.query.init(x, y, z));
+            return query;
+        }
+
+
+        /**
+         * @param region Region to intersect
+         * @return Completed pooled query with all regions intersecting with region, see {@link RegionMap#getRegions(Region, LIndexList, RegionQuery)}
+         */
+        public RegionQuery getRegions(final Region region) {
+            RegionQuery query;
+            map.getRegions(region, list, query = this.query);
+            return query;
+        }
+
+
+        /**
+         * @param region Region to intersect
+         * @return Completed pooled or effective query with all regions intersecting with region, see {@link RegionMap#getRegionsAuto(Region, LIndexList)}
+         */
+        public RegionQuery getRegionsAuto(final Region region) {
+            int volume = region.volume();
+            RegionQuery query = volume > Region.EFFECTIVE_MAX_VOLUME ? new LargeRegionQuery() : this.query;
+            map.getRegions(region, list, query);
+            return query;
+        }
+    }
+
+
+    /**
      * Geo saving query / task
      */
-    private static class GeoSaveQuery extends LargeRegionQuery implements Runnable{
+    private static final class GeoSaveQuery extends LargeRegionQuery implements Runnable{
         private Region areaToSave;
         private long index;
         private final File geoDir;
 
-        public GeoSaveQuery(long geoIndex, File geoDir){
+        public GeoSaveQuery(final long geoIndex, final File geoDir){
             this.index = geoIndex;
             this.geoDir = geoDir;
             editRegion(geoIndex);
         }
 
 
-        public void editRegion(long geoIndex){
+        public void editRegion(final long geoIndex){
             this.index = geoIndex;
             int startX = (int)(geoIndex >> 32) ;
             int startZ = (int)(geoIndex)       ;
