@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
  * <p>
  * Uses the specified directory to store basic data about the regions.
  * <p>
- * Before requiring regions from disk, use {@link #ensureLoaded(LIndexList, Region)} to ensure that geo region will be loaded
+ * Before requiring regions from disk, use {@link #ensureLoaded(LIndexList, Region)} to ensure that geo regions will be loaded
  * <p>
  * Saving does not happen automatically. Use {@link #flushToDisk(Executor)} to flush all modified regions to disk
  */
