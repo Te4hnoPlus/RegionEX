@@ -4,7 +4,6 @@ import plus.region.Region;
 import plus.region.RegionMapEx;
 import plus.region.RegionQuery;
 import plus.region.utl.LIndexList;
-
 import java.io.File;
 
 
@@ -53,5 +52,26 @@ public class TestMap {
         map.flushToDisk(null);
 
         System.out.println("SAVED");
+
+        test2();
+    }
+
+
+    public static void test2(){
+        RegionQuery query = new RegionQuery();
+
+        RegionMapEx map = new RegionMapEx(new File("data"));
+        map.ensureLoaded(new Region(-512, 0, -512, 1512, 0, 1512));
+
+        for (int i=40;i<60;i+=4){
+            map.getRegions(query.init(12+i, 12+i, 12+i));
+            if(query.isEmpty()){
+                continue;
+            }
+            System.out.println("-------["+query.getX()+", "+query.getY()+", "+query.getZ()+"]-----------------------------------------------");
+            for (Region region : query){
+                System.out.println(region);
+            }
+        }
     }
 }

@@ -21,6 +21,8 @@ public final class CharNum {
     public String getCharNumOf(long i){
         if(i ==  0) return String.valueOf(charLib[0]);
         StringBuilder s = new StringBuilder();
+        if(i < 0)s.append("-");
+        i = -i;
         while (i > 0){
             s.insert(0, charLib[(int) (i % charLib.length)]);
             i /= charLib.length;

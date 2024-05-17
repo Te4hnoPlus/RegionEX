@@ -6,6 +6,8 @@ import plus.region.utl.LIndexList;
 import java.io.File;
 import java.util.concurrent.Executor;
 
+import static plus.region.Region.GEO_MASK;
+
 
 /**
  * Directory-linked map of regions
@@ -177,12 +179,13 @@ public class RegionMapEx extends RegionMap {
 
 
         public void editRegion(long geoIndex){
-            int startX = (int)(geoIndex >> 32);
-            int startZ = (int)(geoIndex);
+            int startX = ((int)(geoIndex >> 32)) & GEO_MASK;
+            int startZ = ((int)(geoIndex))       & GEO_MASK;
 
             areaToSave = new Region(
                     startX, 0, startZ, startX + 1024, 256, startZ + 1024
             );
+            System.out.println(areaToSave);
         }
 
 
