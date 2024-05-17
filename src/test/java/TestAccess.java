@@ -27,6 +27,37 @@ public class TestAccess {
 
             System.out.println(adapter.name.get() + ", " + adapter.age.get());
         }
+
+        System.out.println("---------------------------------");
+
+        test2();
+    }
+
+    public static void test2(){
+        Int2ObjectMap<ExampleField> manager = new Int2ObjectOpenHashMap<>();
+        RegionQuery regions = new RegionQuery();
+
+        for (int i = 0; i < 10; i++) {
+            Region region;
+            regions.addRegion(region = new Region(1000+i, 10+i, 10+i, 10+i, 20+i, 20+i, 20+i));
+
+            ExampleField field;
+            region.setData(manager, field = new ExampleField());
+            field.name = "REG: "+region.id;
+            field.age = i;
+        }
+
+        for (Region region : regions) {
+            ExampleField field = region.getData(manager);
+
+            System.out.println(field.name + ", " + field.age);
+        }
+    }
+
+
+    public static class ExampleField{
+        public String name;
+        public int age;
     }
 
 
