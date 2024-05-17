@@ -212,4 +212,10 @@ public class RegionMap implements Iterable<Region>{
             return prev;
         }
     }
+
+
+    @Override
+    public String toString() {
+        return map.toString();
+    }
 }
