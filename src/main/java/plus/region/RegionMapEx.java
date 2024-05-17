@@ -143,10 +143,16 @@ public class RegionMapEx extends RegionMap {
 
         if(executor == null)executor = DEFAULT;
 
+        GeoSaveQuery query = null;
         for (long index: prev){
-            GeoSaveQuery query = new GeoSaveQuery(index, geoDir);
+            if(query == null) query =  new GeoSaveQuery(index, geoDir);
+            else query.editRegion(index);
             getRegions(query.areaToSave, query);
-            executor.execute(query);
+
+            if(!query.isEmpty()) {
+                executor.execute(query);
+                query = null;
+            }
         }
     }
 
@@ -155,13 +161,18 @@ public class RegionMapEx extends RegionMap {
      * Geo saving query / task
      */
     private static class GeoSaveQuery extends LargeRegionQuery implements Runnable{
-        private final Region areaToSave;
-        private final long index;
+        private Region areaToSave;
+        private long index;
         private final File geoDir;
 
         public GeoSaveQuery(long geoIndex, File geoDir){
             this.index = geoIndex;
             this.geoDir = geoDir;
+            editRegion(geoIndex);
+        }
+
+
+        public void editRegion(long geoIndex){
             int startX = (int)(geoIndex >> 32);
             int startZ = (int)(geoIndex);
 

@@ -80,7 +80,7 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
 
 
     public static RegionStream readGeo(long id, final File geoDir){
-        File file = new File(geoDir, id + ".geo");
+        File file = new File(geoDir, CharNum.Default.getCharNumOf(id>>8) + ".geo");
         RegionStream stream = new RegionStream();
         if(!file.exists())return stream;
 
@@ -95,17 +95,15 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
 
 
     public static void writeGeo(long id, final File geoDir, Iterator<Region> regions){
-        File file = new File(geoDir, id + ".geo");
-        if(!file.exists())return;
+        File file = new File(geoDir, CharNum.Default.getCharNumOf(id>>8) + ".geo");
         try {
-            file.createNewFile();
+            if(!file.exists()) file.createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         FileOutputStream os = null;
         try {
             os = new FileOutputStream(file);
-
             write(os, regions);
         } catch (IOException e) {
             throw new RuntimeException(e);

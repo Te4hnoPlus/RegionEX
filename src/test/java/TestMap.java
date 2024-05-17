@@ -14,13 +14,14 @@ public class TestMap {
         TestAccess.Adapter adapter = new TestAccess.Adapter(manager);
 
         RegionMapEx map = new RegionMapEx(new File("data"));
-        map.ensureLoaded(new Region(-512, 0, -512, 512, 0, 512));
+        map.ensureLoaded(new Region(-512, 0, -512, 1512, 0, 1512));
         LIndexList indexList = new LIndexList();
 
         int count = 0;
 
-        for (int i=0;i<120;i+=1){
-            map.add(indexList, new Region(1000+i, 10+i, 10+i, 10+i, 50+i, 50+i, 50+i));
+        for (int i=0;i<1250;i+=37){
+            int h = i % 50;
+            map.add(indexList, new Region(1000+i, 10+i, 10+h, 10+i, 50+i, 30+h, 50+i));
             ++count;
         }
 
@@ -50,5 +51,7 @@ public class TestMap {
         System.out.println("COUNT: "+count); // should be 0
 
         map.flushToDisk(null);
+
+        System.out.println("SAVED");
     }
 }
