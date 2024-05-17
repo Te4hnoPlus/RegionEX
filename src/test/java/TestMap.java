@@ -1,9 +1,11 @@
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import plus.region.Region;
-import plus.region.RegionMap;
+import plus.region.RegionMapEx;
 import plus.region.RegionQuery;
 import plus.region.utl.LIndexList;
+
+import java.io.File;
 
 
 public class TestMap {
@@ -11,7 +13,8 @@ public class TestMap {
         Int2ObjectMap<Object[]> manager = new Int2ObjectOpenHashMap<>();
         TestAccess.Adapter adapter = new TestAccess.Adapter(manager);
 
-        RegionMap map = new RegionMap();
+        RegionMapEx map = new RegionMapEx(new File("data"));
+        map.ensureLoaded(new Region(-512, 0, -512, 512, 0, 512));
         LIndexList indexList = new LIndexList();
 
         int count = 0;
@@ -45,5 +48,7 @@ public class TestMap {
         }
 
         System.out.println("COUNT: "+count); // should be 0
+
+        map.flushToDisk(null);
     }
 }

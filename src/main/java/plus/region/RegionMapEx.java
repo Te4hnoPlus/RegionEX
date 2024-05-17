@@ -23,6 +23,10 @@ public class RegionMapEx extends RegionMap {
     protected final File geoDir;
 
     public RegionMapEx(File geoDir) {
+        if(geoDir.isFile())throw new IllegalArgumentException("Input file must be a directory");
+        if(!geoDir.exists()){
+            if(!geoDir.mkdirs())throw new IllegalArgumentException("Cannot create directory here");
+        }
         this.geoDir = geoDir;
     }
 
@@ -47,6 +51,14 @@ public class RegionMapEx extends RegionMap {
     }
 
 
+    /**
+     * It is not recommended to use, {@link RegionMapEx#ensureLoaded(LIndexList, Region)}
+     * @param region check region
+     */
+    public void ensureLoaded(final Region region){
+        ensureLoaded(new LIndexList(), region);
+    }
+
 
     /**
      * Ensure that geo region for check region will be loaded
@@ -60,6 +72,16 @@ public class RegionMapEx extends RegionMap {
         while (itr.hasNext()) dirtyGeo.add(itr.nextLong());
 
         ensureLoadedGeo(itr, list);
+    }
+
+
+    /**
+     * It is not recommended to use, {@link RegionMapEx#ensureLoaded(LIndexList, int, int)}
+     * @param x block x
+     * @param z block z
+     */
+    public void ensureLoaded(int x, int z){
+        ensureLoaded(new LIndexList(), x, z);
     }
 
 

@@ -157,7 +157,7 @@ public class ChunkedRegionContainer extends RegionContainer{
                         next = regions[chunkIndex++][0];
                         return;
                     }
-
+                next = null;
             } else
                 next = curChunk[regionIndex++];
         }
