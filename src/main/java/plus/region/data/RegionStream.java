@@ -1,6 +1,7 @@
 package plus.region.data;
 
 import plus.region.Region;
+import plus.region.utl.CharNum;
 import plus.region.utl.FastExitException;
 import java.io.*;
 import java.util.Iterator;
@@ -61,11 +62,20 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
     }
 
 
+    /**
+     * Close stream manually
+     * @throws IOException if close fails
+     */
     public void close() throws IOException {
         stream.close();
     }
 
 
+    /**
+     * Read 1 region (22 bytes) from stream
+     * @throws FastExitException on end of stream
+     * @throws IOException if read fails
+     */
     public static Region read1(final InputStream stream) throws FastExitException, IOException {
         return new Region(
                 readInt(stream), //id
@@ -79,8 +89,40 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
     }
 
 
+    /**
+     * Write 1 region (22 bytes) to stream
+     * @param stream stream to write
+     * @param region region to write
+     * @throws IOException if write fails
+     */
+    public static void write1(final OutputStream stream, final Region region) throws IOException {
+        writeInt(stream, region.id     ); //id
+        writeInt(stream, region.minX   ); //min x
+        stream.write(region.minY);        //min y (0-255)
+        writeInt(stream, region.minZ   ); //min z
+        writeInt(stream, region.maxX   ); //max x
+        stream.write(region.maxY);        //max y (0-255)
+        writeInt(stream, region.maxZ   ); //max z
+    }
+
+
+    /**
+     * @param id Geo index
+     * @return Slim file name
+     */
+    private static String fileName(long id){
+        return CharNum.Default.getCharNumOf(id>>8) + ".geo";
+    }
+
+
+    /**
+     * Read geo (1024 x 1024) container from directory
+     * @param id Geo index
+     * @param geoDir root directory to store geo region contents
+     * @return Iterator of regions from saved geo container
+     */
     public static RegionStream readGeo(long id, final File geoDir){
-        File file = new File(geoDir, CharNum.Default.getCharNumOf(id>>8) + ".geo");
+        File file = new File(geoDir, fileName(id));
         RegionStream stream = new RegionStream();
         if(!file.exists())return stream;
 
@@ -94,8 +136,26 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
     }
 
 
+    /**
+     * Removes geo (1024 x 1024) container from directory
+     * @param id Geo index
+     * @param geoDir root directory to store geo region contents
+     */
+    public static void removeGeo(long id, final File geoDir){
+        File file = new File(geoDir, fileName(id));
+        if(!file.exists())return;
+        file.delete();
+    }
+
+
+    /**
+     * Overwrites geo (1024 x 1024) container in directory
+     * @param id Geo index
+     * @param geoDir root directory to store geo region contents
+     * @param regions Iterator of regions in geo
+     */
     public static void writeGeo(long id, final File geoDir, Iterator<Region> regions){
-        File file = new File(geoDir, CharNum.Default.getCharNumOf(id>>8) + ".geo");
+        File file = new File(geoDir, fileName(id));
         try {
             if(!file.exists()) file.createNewFile();
         } catch (IOException e) {
@@ -133,36 +193,25 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
      * @param regions the regions iterator to write
      */
     public static void write(final OutputStream stream, final Iterator<Region> regions) {
-        final byte[] arr = new byte[4];
         while (regions.hasNext()) try {
-            Region region = regions.next();
-            write(stream, region.id,   arr); //id
-            write(stream, region.minX, arr); //min x
-            stream.write(region.minY);       //min y (0-255)
-            write(stream, region.minZ, arr); //min z
-            write(stream, region.maxX, arr); //max x
-            stream.write(region.maxY);       //max y (0-255)
-            write(stream, region.maxZ, arr); //max z
+            write1(stream, regions.next());
         } catch (IOException e) {
             return;
         }
     }
 
 
-    private static void write(final OutputStream stream, final int value, final byte[] temp) throws IOException {
-        codeInt(value, temp);
-        stream.write(temp);
-    }
-
-
     /**
-     * Code int to temporal byte array
+     * Code and write int to output stream
+     * @param stream stream to write
+     * @param value int to write
+     * @throws IOException if write fails
      */
-    public static void codeInt(final int value, final byte[] temp){
-        temp[0] = (byte) ((value >> 24) & 0xFF);
-        temp[1] = (byte) ((value >> 16) & 0xFF);
-        temp[2] = (byte) ((value >> 8) & 0xFF);
-        temp[3] = (byte) (value & 0xFF);
+    public static void writeInt(final OutputStream stream, final int value) throws IOException {
+        stream.write((byte) ((value >> 24) & 0xFF));
+        stream.write((byte) ((value >> 16) & 0xFF));
+        stream.write((byte) ((value >> 8) & 0xFF));
+        stream.write((byte) (value & 0xFF));
     }
 
 

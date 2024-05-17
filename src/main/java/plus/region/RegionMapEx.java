@@ -146,10 +146,14 @@ public class RegionMapEx extends RegionMap {
         GeoSaveQuery query = null;
         for (long index: prev){
             if(query == null) query =  new GeoSaveQuery(index, geoDir);
-            else query.editRegion(index);
+            else              query.editRegion(index);
+
             getRegions(query.areaToSave, query);
 
-            if(!query.isEmpty()) {
+            if(query.isEmpty()) {
+                long remove = query.index;
+                executor.execute(() -> RegionStream.readGeo(remove, geoDir));
+            } else {
                 executor.execute(query);
                 query = null;
             }
