@@ -6,8 +6,6 @@ import plus.region.utl.LIndexList;
 import java.io.File;
 import java.util.concurrent.Executor;
 
-import static plus.region.Region.GEO_MASK;
-
 
 /**
  * Directory-linked map of regions
@@ -35,19 +33,17 @@ public class RegionMapEx extends RegionMap {
 
     private void ensureLoadedGeo(LIndexList.Itr itr, LIndexList list){
         itr.reset();
+        LIndexList temp = null;
         while (itr.hasNext()){
             final long geoIndex = itr.nextLong();
             if(!loadedGeo.contains(geoIndex)){
                 loadedGeo.add(geoIndex);
-                boolean reuse;
 
-                LIndexList temp = (reuse = itr.hasNext())? new LIndexList() : list;
+                if(temp == null) temp = itr.hasNext()? new LIndexList() : list;
 
                 RegionStream toAdd = RegionStream.readGeo(geoIndex, geoDir);
 
                 while (toAdd.hasNext()) systemAdd(temp, toAdd.next());
-
-                if(reuse)return;
             }
         }
     }
@@ -154,7 +150,7 @@ public class RegionMapEx extends RegionMap {
 
             if(query.isEmpty()) {
                 long remove = query.index;
-                executor.execute(() -> RegionStream.readGeo(remove, geoDir));
+                executor.execute(() -> RegionStream.removeGeo(remove, geoDir));
             } else {
                 executor.execute(query);
                 query = null;
@@ -179,13 +175,12 @@ public class RegionMapEx extends RegionMap {
 
 
         public void editRegion(long geoIndex){
-            int startX = ((int)(geoIndex >> 32)) & GEO_MASK;
-            int startZ = ((int)(geoIndex))       & GEO_MASK;
+            int startX = (int)(geoIndex >> 32) ;
+            int startZ = (int)(geoIndex)       ;
 
             areaToSave = new Region(
                     startX, 0, startZ, startX + 1024, 256, startZ + 1024
             );
-            System.out.println(areaToSave);
         }
 
 

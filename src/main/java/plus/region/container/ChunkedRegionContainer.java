@@ -127,6 +127,20 @@ public class ChunkedRegionContainer extends RegionContainer{
     }
 
 
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("<C: ");
+        for (Region[] curRegions : regions) {
+            if (curRegions == null) continue;
+            for (Region region : curRegions)
+                builder.append(region).append(", ");
+        }
+        builder.setCharAt(builder.length() - 1, '>');
+        return builder.toString();
+    }
+
+
     public static class Itr implements Iterator<Region> {
         private final Region[][] regions;
         private int chunkIndex, regionIndex;

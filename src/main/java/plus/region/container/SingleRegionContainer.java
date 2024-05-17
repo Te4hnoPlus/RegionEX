@@ -31,7 +31,7 @@ public class SingleRegionContainer extends RegionContainer{
     @Override
     public void getRegions(final Region region, final RegionQuery query) {
         if(region.intersects(this.region))
-            query.addRegion(region);
+            query.addRegion(this.region);
     }
 
 
@@ -88,5 +88,11 @@ public class SingleRegionContainer extends RegionContainer{
             region = null;
             return prev;
         }
+    }
+
+
+    @Override
+    public String toString() {
+        return "<C: " + region.toString() + ">";
     }
 }

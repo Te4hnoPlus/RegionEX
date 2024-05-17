@@ -79,4 +79,10 @@ public class RegionContainer implements Iterable<Region>{
     public Iterator<Region> iterator() {
         return EMPTY_ITERATOR;
     }
+
+
+    @Override
+    public String toString() {
+        return "<C>";
+    }
 }

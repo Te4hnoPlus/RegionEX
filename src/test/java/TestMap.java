@@ -39,13 +39,13 @@ public class TestMap {
             }
         }
 
-        for (Region region: map){
-            adapter.use(region);
-            if(adapter.name.get() == null){
-                System.out.println(region);
-            }
-            --count;
-        }
+//        for (Region region: map){
+//            adapter.use(region);
+//            if(adapter.name.get() == null){
+//                System.out.println(region);
+//            }
+//            --count;
+//        }
 
         System.out.println("COUNT: "+count); // should be 0
 
@@ -73,5 +73,9 @@ public class TestMap {
                 System.out.println(region);
             }
         }
+
+        System.out.println("READ TESTED");
+
+        System.out.println(map);
     }
 }

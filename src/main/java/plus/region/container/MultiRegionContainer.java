@@ -32,7 +32,7 @@ public class MultiRegionContainer extends RegionContainer{
     @Override
     public void getRegions(final Region region, final RegionQuery query) {
         for (Region curRegion : regions)
-            if(region.intersects(curRegion)) query.addRegion(region);
+            if(region.intersects(curRegion)) query.addRegion(curRegion);
     }
 
 
@@ -89,5 +89,17 @@ public class MultiRegionContainer extends RegionContainer{
     @Override
     public Iterator<Region> iterator() {
         return new RegionQuery.Itr(regions, regions.length);
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("<C: ");
+        for (Region region : regions) {
+            builder.append(region);
+            builder.append(",");
+        }
+        builder.setCharAt(builder.length() - 1, '>');
+        return builder.toString();
     }
 }
