@@ -123,4 +123,34 @@ public class IoUtils {
         long secondLong = readLong(stream);
         return new UUID(firstLong, secondLong);
     }
+
+
+
+    /**
+     * Code and write string to output stream
+     * @param stream stream to write
+     * @param value string (0-255 bytes) to write
+     * @throws IOException if write fails
+     */
+    public static void writeShortString(final OutputStream stream, final String value) throws IOException {
+        byte[] bytes = value.getBytes();
+        if(bytes.length > 255) throw new IOException("String too long");
+        stream.write(bytes.length);
+        stream.write(bytes);
+    }
+
+
+    /**
+     * Read and encode string from input stream
+     * @return read (0-255 bytes) as string
+     * @throws IOException if read fails
+     * @throws FastExitException on end of stream
+     */
+    public static String readShortString(final InputStream stream) throws IOException, FastExitException {
+        int len = stream.read();
+        if(len == -1) throw FastExitException.INSTANCE;
+        byte[] bytes = new byte[len];
+        if(stream.read(bytes, 0, len) != len) throw FastExitException.INSTANCE;
+        return new String(bytes);
+    }
 }
