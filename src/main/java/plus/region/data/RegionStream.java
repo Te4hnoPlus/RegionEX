@@ -5,6 +5,7 @@ import plus.region.utl.CharNum;
 import plus.region.utl.FastExitException;
 import java.io.*;
 import java.util.Iterator;
+import static plus.region.data.IoUtils.*;
 
 
 /**
@@ -198,38 +199,5 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
         } catch (IOException e) {
             return;
         }
-    }
-
-
-    /**
-     * Code and write int to output stream
-     * @param stream stream to write
-     * @param value int to write
-     * @throws IOException if write fails
-     */
-    public static void writeInt(final OutputStream stream, final int value) throws IOException {
-        stream.write((byte) ((value >> 24) & 0xFF));
-        stream.write((byte) ((value >> 16) & 0xFF));
-        stream.write((byte) ((value >> 8) & 0xFF));
-        stream.write((byte) (value & 0xFF));
-    }
-
-
-    /**
-     * Read and encode int from input stream
-     * @return read int
-     * @throws IOException if read fails
-     * @throws FastExitException on end of stream
-     */
-    public static int readInt(final InputStream stream) throws IOException, FastExitException{
-        int first = stream.read();
-        if(first == -1) throw FastExitException.INSTANCE;
-        int second = stream.read();
-        if(second == -1) throw FastExitException.INSTANCE;
-        int third = stream.read();
-        if(third == -1) throw FastExitException.INSTANCE;
-        int fourth = stream.read();
-        if(fourth == -1) throw FastExitException.INSTANCE;
-        return (first << 24) + (second << 16) + (third << 8) + fourth;
     }
 }
