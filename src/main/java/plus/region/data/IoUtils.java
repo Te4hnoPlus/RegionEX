@@ -17,7 +17,7 @@ public class IoUtils {
      * @param value int (0-65535) to write
      * @throws IOException if write fails
      */
-    public static void writeShort(OutputStream stream, int value) throws IOException {
+    public static void writeShort(final OutputStream stream, final int value) throws IOException {
         stream.write((byte) ((value >> 8) & 0xFF));
         stream.write((byte) (value & 0xFF));
     }
@@ -77,7 +77,7 @@ public class IoUtils {
      * @param value long to write
      * @throws IOException if write fails
      */
-    public static void writeLong(OutputStream stream, long value) throws IOException {
+    public static void writeLong(final OutputStream stream, final long value) throws IOException {
         stream.write((byte) ((value >> 56) & 0xFF));
         stream.write((byte) ((value >> 48) & 0xFF));
         stream.write((byte) ((value >> 40) & 0xFF));
@@ -106,7 +106,7 @@ public class IoUtils {
      * @param uuid UUID to write
      * @throws IOException if write fails
      */
-    public static void writeUuid(UUID uuid, OutputStream stream) throws IOException {
+    public static void writeUUID(final OutputStream stream, final UUID uuid) throws IOException {
         writeLong(stream, uuid.getMostSignificantBits());
         writeLong(stream, uuid.getLeastSignificantBits());
     }
@@ -118,7 +118,7 @@ public class IoUtils {
      * @throws IOException if read fails
      * @throws FastExitException on end of stream
      */
-    public static UUID readUUID(InputStream stream) throws IOException, FastExitException {
+    public static UUID readUUID(final InputStream stream) throws IOException, FastExitException {
         long firstLong = readLong(stream);
         long secondLong = readLong(stream);
         return new UUID(firstLong, secondLong);
