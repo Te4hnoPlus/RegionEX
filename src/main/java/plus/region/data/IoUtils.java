@@ -1,10 +1,12 @@
 package plus.region.data;
 
+import plus.region.Region;
 import plus.region.utl.FastExitException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+
+import java.io.*;
+import java.util.Iterator;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 
 /**
@@ -152,5 +154,34 @@ public class IoUtils {
         byte[] bytes = new byte[len];
         if(stream.read(bytes, 0, len) != len) throw FastExitException.INSTANCE;
         return new String(bytes);
+    }
+
+
+    public interface IoTask {
+        void accept(OutputStream stream) throws IOException;
+    }
+
+
+    public static void writeToFile(File file, IoTask task) {
+        try {
+            if(!file.exists()) file.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(file);
+            task.accept(os);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if(os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 }

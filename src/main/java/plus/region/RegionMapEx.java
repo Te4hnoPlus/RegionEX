@@ -2,9 +2,13 @@ package plus.region;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongPredicate;
+import plus.region.data.IoUtils;
+import plus.region.data.NextIdMap;
 import plus.region.data.RegionStream;
 import plus.region.utl.LIndexList;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 
@@ -23,17 +27,27 @@ public class RegionMapEx extends RegionMap {
     protected final LongOpenHashSet loadedGeo = new LongOpenHashSet();
     protected LongOpenHashSet dirtyGeo  = new LongOpenHashSet();
     protected final File geoDir;
+    protected final NextIdMap nextIdMap = new NextIdMap();
 
     public RegionMapEx(final File geoDir) {
-        if(geoDir.isFile())throw new IllegalArgumentException("Input file must be a directory");
-        if(!geoDir.exists()){
-            if(!geoDir.mkdirs())throw new IllegalArgumentException("Cannot create directory here");
+        if(geoDir != null) {
+            if (geoDir.isFile()) throw new IllegalArgumentException("Input file must be a directory");
+            if (!geoDir.exists()) {
+                if (!geoDir.mkdirs()) throw new IllegalArgumentException("Cannot create directory here");
+            }
         }
         this.geoDir = geoDir;
+        NextIdMap.readMap(nextIdMap, geoDir);
+    }
+
+
+    public NextIdMap idMap(){
+        return nextIdMap;
     }
 
 
     private void ensureLoadedGeo(final LIndexList.Itr itr, final LIndexList list){
+        if(geoDir == null) return;
         itr.reset();
         LIndexList temp = null;
         while (itr.hasNext()){
@@ -48,6 +62,16 @@ public class RegionMapEx extends RegionMap {
                 while (toAdd.hasNext()) systemAdd(temp, toAdd.next());
             }
         }
+    }
+
+
+    public void clearDirty(){
+        dirtyGeo  = new LongOpenHashSet();
+    }
+
+
+    public boolean hasDirty(){
+        return !dirtyGeo.isEmpty();
     }
 
 
@@ -229,12 +253,25 @@ public class RegionMapEx extends RegionMap {
      * @param executor Async executor. If null, will use current thread as executor
      */
     public void flushToDisk(Executor executor){
+        if(executor == null)executor = DEFAULT;
+
+        if(nextIdMap.isDirty() && geoDir != null) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try {
+                NextIdMap.writeTo(nextIdMap, out);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            nextIdMap.setDirty(false);
+            executor.execute(() -> IoUtils.writeToFile(NextIdMap.nextIdFile(geoDir), out::writeTo));
+        }
+
         if(dirtyGeo.isEmpty())return;
 
         LongOpenHashSet prev = dirtyGeo;
         dirtyGeo = new LongOpenHashSet();
 
-        if(executor == null)executor = DEFAULT;
+        if(geoDir == null) return;
 
         GeoSaveQuery query = null;
         for (long index: prev){
@@ -366,6 +403,40 @@ public class RegionMapEx extends RegionMap {
             RegionQuery query = volume > Region.EFFECTIVE_MAX_VOLUME ? new LargeRegionQuery() : this.query;
             map.getRegions(region, list, query);
             return query;
+        }
+
+
+        /**
+         * @param chunkPosIter Iterator of all loaded chunk indexes
+         * @return Dirty geo indexes to be unloaded, see {@link RegionMapEx#checkToUnload(LIndexList, Iterator)}
+         */
+        public LIndexList checkToUnload(Iterator<Long> chunkPosIter){
+            map.checkToUnload(list, chunkPosIter);
+            return list;
+        }
+
+
+        /**
+         * Create new region and choose ID automatically
+         * @param minX min region block x
+         * @param minY min region block y (0-255)
+         * @param minZ min region block z
+         * @param maxX max region block x
+         * @param maxY max region block y (0-255)
+         * @param maxZ max region block z
+         * @return new region
+         */
+        public Region createRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+            if(minY > maxY){
+                int t = minY;
+                minY = maxY;
+                maxY = t;
+            }
+            if(minY < 0)   minY = 0;
+            if(maxY > 255) maxY = 255;
+            Region region = new Region(map.nextIdMap.nextId(), minX, minY, minZ, maxX, maxY, maxZ);
+            map.add(list, region);
+            return region;
         }
 
 

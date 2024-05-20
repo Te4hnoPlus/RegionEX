@@ -9,6 +9,11 @@ import java.util.ArrayList;
 
 public class TestMap {
     public static void main(String[] args) {
+        main(false);
+    }
+
+    public static void main(boolean printID) {
+
         if (1 == 1) {
             Int2ObjectMap<Object[]> manager = new Int2ObjectOpenHashMap<>();
             TestAccess.Adapter adapter = new TestAccess.Adapter(manager);
@@ -21,7 +26,8 @@ public class TestMap {
 
             for (int i = 0; i < 1250; i += 37) {
                 int h = i % 50;
-                ctx.add(new Region(1000 + i, 10 + i, 10 + h, 10 + i, 50 + i, 30 + h, 50 + i));
+                Region reg = ctx.createRegion(10 + i, 10 + h, 10 + i, 50 + i, 30 + h, 50 + i);
+                if(printID) System.out.println("NEW: " + reg.id);
                 ++count;
             }
 
@@ -37,13 +43,13 @@ public class TestMap {
                 }
             }
 
-            for (Region region : map) {
-                adapter.use(region);
-                if (adapter.name.get() == null) {
-                    System.out.println(region);
-                }
-                --count;
-            }
+//            for (Region region : map) {
+//                adapter.use(region);
+//                if (adapter.name.get() == null) {
+//                    System.out.println(region);
+//                }
+//                --count;
+//            }
 
             System.out.println("COUNT: " + count); // should be 0
 
@@ -67,8 +73,13 @@ public class TestMap {
                 continue;
             }
             System.out.println("-------["+query.getX()+", "+query.getY()+", "+query.getZ()+"]-----------------------------------------------");
+            int lim = 5;
             for (Region region : query){
                 System.out.println(region);
+                if(--lim < 0) {
+                    System.out.println("And "+(query.size()-5)+" more...");
+                    break;
+                }
             }
         }
 

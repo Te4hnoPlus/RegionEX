@@ -156,27 +156,7 @@ public class RegionStream implements Iterable<Region>, Iterator<Region> {
      * @param regions Iterator of regions in geo
      */
     public static void writeGeo(long id, final File geoDir, Iterator<Region> regions){
-        File file = new File(geoDir, fileName(id));
-        try {
-            if(!file.exists()) file.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        FileOutputStream os = null;
-        try {
-            os = new FileOutputStream(file);
-            write(os, regions);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if(os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+        writeToFile(new File(geoDir, fileName(id)), os -> write(os, regions));
     }
 
 

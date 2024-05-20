@@ -117,6 +117,14 @@ public class Region {
      * @return Mathematical cuboid volume
      */
     public int volume() {
+        return calcVolume(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+
+    /**
+     * @return Mathematical cuboid volume
+     */
+    public static int calcVolume(final int minX, final int minY, final int minZ, final int maxX, final int maxY, final int maxZ) {
         return (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
     }
 

@@ -40,7 +40,8 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     @Override
     public RegionContainer addRegion(final Region region) {
-        for(int y = region.minY; y <= region.maxY; y+=16)
+        final int maxY = region.maxY & 15;
+        for(int y = region.minY; y <= maxY; y+=16)
             addToIndex(y >> 4, region);
         return this;
     }
@@ -48,7 +49,8 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     @Override
     public RegionContainer removeRegion(final Region region) {
-        for(int y = region.minY; y <= region.maxY; y+=16)
+        final int maxY = region.maxY & 15;
+        for(int y = region.minY; y <= maxY; y+=16)
             removeFromIndex(y >> 4, region);
 
         //todo if size == 4 use MultiRegionContainer
@@ -98,10 +100,13 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     @Override
     public void getRegions(final Region region, final RegionQuery query) {
-        final Region[] curRegions;
-        if((curRegions = regions[query.getY() >> 4]) != null)
+        final int maxY = region.maxY & 15;
+        for(int y = region.minY; y <= maxY; y+=16){
+            final Region[] curRegions;
+            if((curRegions = regions[y >> 4]) == null) continue;
             for(Region curRegion: curRegions)
                 if(curRegion.intersects(region)) query.addRegion(curRegion);
+        }
     }
 
 
