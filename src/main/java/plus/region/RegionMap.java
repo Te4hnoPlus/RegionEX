@@ -241,6 +241,11 @@ public class RegionMap implements Iterable<Region>{
     }
 
 
+    public int indexLen(){
+        return map.size();
+    }
+
+
     @Override
     public String toString() {
         return map.toString();

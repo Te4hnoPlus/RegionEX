@@ -16,7 +16,10 @@ public class Region {
     public static final int GEO_SIZE             = 1024      ;
     public static final int CHUNK_SIZE           = 16        ;
     public static final int CHUNK_MASK           = 0xFFFFFFF0;
+    public static final int CHUNK_MASK_ADD       = 15;
     public static final int GEO_MASK             = 0xFFFFF400;
+    public static final long GEO_MERGED_MASK     = 0xFFFFF400FFFFF400L;
+    public static final int GEO_MASK_ADD         = 1023;
 
     public final int id, minX, minY, minZ, maxX, maxY, maxZ;
     private Object data;
@@ -139,13 +142,33 @@ public class Region {
 
 
     /**
+     * @param index Mc chunk index
+     * @return Horizontal geo (1024 x 1024) index
+     */
+    public static long mcChunkToGeoIndex(long index) {
+        return calcGeoIndex(((int) (index >> 32)) << 4, ((int) index) << 4);
+    }
+
+
+    /**
+     * @param index Horizontal chunk (16 x 16) index
+     * @return Converted geo (1024 x 1024) index from chunk index
+     */
+    public static long chunkIndexToGeoIndex(final long index) {
+        return index & GEO_MERGED_MASK;
+    }
+
+
+    /**
      * @param list List indexes to reuse/fill
      * @param region Region to calculate horizontal chunk (16 x 16) indexes
      */
     public static void computeIndexes(final LIndexList list, final Region region){
         list.clear();
-        for(int x = region.minX; x <= region.maxX; x += CHUNK_SIZE)
-            for(int z = region.minZ; z <= region.maxZ; z += CHUNK_SIZE)
+        final int maxX = region.maxX | CHUNK_MASK_ADD,
+                  maxZ = region.maxZ | CHUNK_MASK_ADD;
+        for(int x = region.minX; x <= maxX; x += CHUNK_SIZE)
+            for(int z = region.minZ; z <= maxZ; z += CHUNK_SIZE)
                 list.add(calcIndex(x, z));
     }
 
@@ -156,22 +179,27 @@ public class Region {
      */
     public static void computeGeoIndexes(final LIndexList list, final Region region) {
         list.clear();
-        for (int x = region.minX; x <= region.maxX; x += GEO_SIZE)
-            for (int z = region.minZ; z <= region.maxZ; z += GEO_SIZE)
+        final int maxX = region.maxX | GEO_MASK_ADD,
+                  maxZ = region.maxZ | GEO_MASK_ADD;
+        for (int x = region.minX; x <= maxX; x += GEO_SIZE)
+            for (int z = region.minZ; z <= maxZ; z += GEO_SIZE)
                 list.add(calcGeoIndex(x, z));
     }
 
 
     /**
      * @param list List indexes to reuse/fill
-     * @param x min area x
-     * @param z min area z
+     * @param minX min area x
+     * @param minZ min area z
      * @param maxX max area x
      * @param maxZ max area z
      */
-    public static void computeGeoIndexes(final LIndexList list, int x, int z, final int maxX, final int maxZ) {
-        for (list.clear(); x <= maxX; x += GEO_SIZE)
-            for (; z <= maxZ; z += GEO_SIZE)
+    public static void computeGeoIndexes(final LIndexList list, final int minX, final int minZ, int maxX, int maxZ) {
+        list.clear();
+        maxX |= GEO_MASK_ADD;
+        maxZ |= GEO_MASK_ADD;
+        for (int x = minX; x <= maxX; x += GEO_SIZE)
+            for (int z = minZ; z <= maxZ; z += GEO_SIZE)
                 list.add(calcGeoIndex(x, z));
     }
 

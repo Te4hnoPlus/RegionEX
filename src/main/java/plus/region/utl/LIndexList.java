@@ -90,6 +90,26 @@ public class LIndexList implements Iterable<Long>{
 
 
     /**
+     * @return Iterator for fixed state
+     */
+    public ResItr fixedIter() {
+        return new ResItr(list, size);
+    }
+
+
+    @Override
+    public String toString() {
+        if(size == 0) return "[]";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i=0;i<size;i++) {
+            sb.append(list[i]).append(",");
+        }
+        sb.setCharAt(sb.length() - 1, ']');
+        return sb.toString();
+    }
+
+
+    /**
      * Fast long list iterator
      * <p>
      * It is recommended to use it repeatedly (if possible) to ensure better performance
@@ -137,6 +157,47 @@ public class LIndexList implements Iterable<Long>{
          */
         public long nextLong() {
             return list.get(index++);
+        }
+    }
+
+
+    /**
+     * Fast long list iterator for fixed state
+     * <p>
+     * Use this iterator only then your need fix list size and array in iterator
+     */
+    public static class ResItr implements Iterator<Long>, Iterable<Long> {
+        private final long[] curArr;
+        private final int curSize;
+        private int cursor = 0;
+
+        public ResItr(final long[] curArr, final int curSize) {
+            this.curArr = curArr;
+            this.curSize = curSize;
+        }
+
+
+        @Override
+        public Iterator<Long> iterator() {
+            cursor = 0;
+            return this;
+        }
+
+
+        @Override
+        public boolean hasNext() {
+            return cursor < curSize;
+        }
+
+
+        @Override
+        public Long next() {
+            return curArr[cursor++];
+        }
+
+
+        public long nextLong() {
+            return curArr[cursor++];
         }
     }
 }

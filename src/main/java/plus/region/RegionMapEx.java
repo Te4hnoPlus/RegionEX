@@ -1,10 +1,12 @@
 package plus.region;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongPredicate;
 import plus.region.data.RegionStream;
 import plus.region.utl.CLIndexList;
 import plus.region.utl.LIndexList;
 import java.io.File;
+import java.util.Iterator;
 import java.util.concurrent.Executor;
 
 
@@ -51,6 +53,58 @@ public class RegionMapEx extends RegionMap {
 
 
     /**
+     * Unload all non-dirty and non-used geo regions
+     * @param chunkPosIter Iterator of all loaded chunk indexes
+     * @return List of dirty geo indexes to be unloaded
+     */
+    public LIndexList checkToUnload(Iterator<Long> chunkPosIter){
+        LIndexList list;
+        checkToUnload(list = new LIndexList(), chunkPosIter);
+        return list;
+    }
+
+
+    /**
+     * Unload all non-dirty and non-used geo regions
+     * @param chunkPosIter Iterator of all loaded chunk indexes
+     * @param list List of indexes to reuse. On completion, it will be filled dirty geo indexes to be unloaded
+     */
+    public void checkToUnload(LIndexList list, Iterator<Long> chunkPosIter){
+        LongOpenHashSet temp = new LongOpenHashSet(); //is really loaded
+
+        while(chunkPosIter.hasNext()){
+            temp.add(Region.mcChunkToGeoIndex(chunkPosIter.next()));
+        }
+
+        list.clear(); //to unload
+        for (long index: loadedGeo){
+            if(!temp.contains(index)) list.add(index);
+        }
+
+        temp.clear(); //now to remove
+        LIndexList.ResItr itr = list.fixedIter();
+        list.clear();
+
+        for (long index: itr){
+            if(!dirtyGeo.contains(index)) {
+                loadedGeo.remove(index);
+                temp.add(index);
+            }
+            else list.add(index);
+        }
+        map.keySet().removeIf(new LongPredicate() {
+            @Override
+            public boolean test(long value) {
+                boolean res = temp.contains(Region.chunkIndexToGeoIndex(value));
+                if(!res)
+                    System.out.println("NENE: "+value);
+                return res;
+            }
+        });
+    }
+
+
+    /**
      * Ensure that geo region for check area will be loaded
      * <p>
      * It is not recommended to use, {@link RegionMapEx#ensureLoaded(LIndexList, int, int, int, int)}
@@ -73,7 +127,6 @@ public class RegionMapEx extends RegionMap {
      * @param maxZ max block z
      */
     public void ensureLoaded(final LIndexList list, final int minX, final int minZ, final int maxX, final int maxZ){
-        list.clear();
         Region.computeGeoIndexes(list, minX, minZ, maxX, maxZ);
         ensureLoadedGeo(list.iterator(), list);
     }
@@ -132,6 +185,7 @@ public class RegionMapEx extends RegionMap {
      * @param z block z
      */
     public void ensureLoaded(final LIndexList list, final int x, final int z){
+        list.clear();
         list.add(Region.calcGeoIndex(x, z));
         ensureLoadedGeo(list.iterator(), list);
     }
@@ -275,8 +329,7 @@ public class RegionMapEx extends RegionMap {
          */
         public void ensureLoaded(final int minX, final int minZ, final int maxX, final int maxZ){
             LIndexList list;
-            (list = this.list).clear();
-            Region.computeGeoIndexes(list, minX, minZ, maxX, maxZ);
+            Region.computeGeoIndexes(list = this.list, minX, minZ, maxX, maxZ);
             map.ensureLoadedGeo(list.iterator(), list);
         }
 
@@ -314,6 +367,14 @@ public class RegionMapEx extends RegionMap {
             RegionQuery query = volume > Region.EFFECTIVE_MAX_VOLUME ? new LargeRegionQuery() : this.query;
             map.getRegions(region, list, query);
             return query;
+        }
+
+
+        /**
+         * @return inner list which is reused in all calculations. Don't call any methods, while using it
+         */
+        public LIndexList list(){
+            return list;
         }
     }
 
