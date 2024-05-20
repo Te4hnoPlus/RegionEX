@@ -39,7 +39,7 @@ public class TestLists {
     public void add2() {
         for (int i = 0; i < loops; i++)
             list2.add(i);
-        for (long l : list)summ += l;
+        for (long l : list2)summ += l;
         list2.clear();
     }
 }
