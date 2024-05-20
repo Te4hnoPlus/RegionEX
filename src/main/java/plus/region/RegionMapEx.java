@@ -3,7 +3,6 @@ package plus.region;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongPredicate;
 import plus.region.data.RegionStream;
-import plus.region.utl.CLIndexList;
 import plus.region.utl.LIndexList;
 import java.io.File;
 import java.util.Iterator;
@@ -42,7 +41,7 @@ public class RegionMapEx extends RegionMap {
             if(!loadedGeo.contains(geoIndex)){
                 loadedGeo.add(geoIndex);
 
-                if(temp == null) temp = itr.hasNext()? new CLIndexList() : list;
+                if(temp == null) temp = itr.hasNext()? new LIndexList() : list;
 
                 RegionStream toAdd = RegionStream.readGeo(geoIndex, geoDir);
 
@@ -267,7 +266,7 @@ public class RegionMapEx extends RegionMap {
      * Context to effective access to {@link RegionMapEx}
      */
     public static class Context{
-        private final CLIndexList list = new CLIndexList();
+        private final LIndexList list = new LIndexList();
         private final RegionQuery query = new RegionQuery();
         private final RegionMapEx map;
 

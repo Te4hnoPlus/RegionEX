@@ -2,7 +2,6 @@ package bench;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import org.openjdk.jmh.annotations.*;
-import plus.region.utl.CLIndexList;
 import plus.region.utl.LIndexList;
 import java.util.concurrent.TimeUnit;
 
@@ -15,14 +14,14 @@ import java.util.concurrent.TimeUnit;
 @Fork(value = 1, warmups = 1)
 @Threads(1)
 public class TestLists {
-    private static int loops = 100;
+    private static int loops = 130;
     private LIndexList list;
     private LongArrayList list2;
     private long summ;
 
     @Setup
     public void init(){
-        list = new CLIndexList();
+        list = new LIndexList();
         list2 = new LongArrayList();
     }
 

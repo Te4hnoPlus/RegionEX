@@ -1,12 +1,10 @@
-import it.unimi.dsi.fastutil.longs.LongList;
 import plus.region.Region;
-import plus.region.utl.CLIndexList;
 import plus.region.utl.LIndexList;
 
 public class TestLst {
     public static void main(String[] args) {
 
-        LIndexList list = new CLIndexList();
+        LIndexList list = new LIndexList();
 
         System.out.println("DEFAULT");
         Region.computeGeoIndexes(list, -512, -512, 1512, 1512);
