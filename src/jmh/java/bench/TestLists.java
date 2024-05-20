@@ -27,7 +27,7 @@ public class TestLists {
     }
 
     @Benchmark
-    public void add() {
+    public void self() {
         for (int i = 0; i < loops; i++)
             list.add(i);
         for (long l : list)summ += l;
@@ -36,7 +36,7 @@ public class TestLists {
 
 
     @Benchmark
-    public void add2() {
+    public void futl() {
         for (int i = 0; i < loops; i++)
             list2.add(i);
         for (long l : list2)summ += l;
