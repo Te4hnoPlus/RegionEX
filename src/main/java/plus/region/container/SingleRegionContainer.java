@@ -29,6 +29,12 @@ public class SingleRegionContainer extends RegionContainer{
 
 
     @Override
+    public void acceptRegions(final int x, final int y, final int z, final Consumer<Region> func) {
+        if(region.contains(x, y, z)) func.accept(region);
+    }
+
+
+    @Override
     public void getRegions(final Region region, final RegionQuery query) {
         if(region.intersects(this.region))
             query.addRegion(this.region);

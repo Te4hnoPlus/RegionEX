@@ -104,6 +104,18 @@ public class RegionMap implements Iterable<Region>{
 
 
     /**
+     * Accept operation to all regions in XYZ point
+     * @param x block x
+     * @param y block y
+     * @param z block z
+     * @param func Consumer to accept
+     */
+    public void acceptRegions(final int x, final int y, final int z, final Consumer<Region> func){
+        map.get(Region.calcIndex(x, z)).acceptRegions(x, y, z, func);
+    }
+
+
+    /**
      * Finds all regions that intersect with region
      * <p>
      * For large area, use {@link LargeRegionQuery}

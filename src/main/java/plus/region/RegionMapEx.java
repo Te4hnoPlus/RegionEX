@@ -1,6 +1,8 @@
 package plus.region;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import plus.region.container.RegionContainer;
 import plus.region.data.IoUtils;
 import plus.region.data.NextIdMap;
 import plus.region.data.RegionStream;
@@ -68,11 +70,12 @@ public class RegionMapEx extends RegionMap {
 
     public void clearDirty(){
         dirtyGeo  = new LongOpenHashSet();
+        nextIdMap.setDirty(false);
     }
 
 
     public boolean hasDirty(){
-        return !dirtyGeo.isEmpty();
+        return !dirtyGeo.isEmpty() || nextIdMap.isDirty();
     }
 
 
@@ -306,10 +309,14 @@ public class RegionMapEx extends RegionMap {
         private final LIndexList list = new LIndexList();
         private final RegionQuery query = new RegionQuery();
         private final RegionMapEx map;
+        private final Long2ObjectOpenHashMap<RegionContainer> mapIndex;
         private RegionConsumerProxy proxy;
+        private RegionContainer lastContainer = null;
+        private long lastIndex = 1; //is illegal chunk index
 
         public Context(final RegionMapEx map) {
             this.map = map;
+            this.mapIndex = map.map;
         }
 
         /**
@@ -381,6 +388,43 @@ public class RegionMapEx extends RegionMap {
             RegionQuery query;
             map.getRegions(query = this.query.init(x, y, z));
             return query;
+        }
+
+
+        /**
+         * Cache last container and index
+         * @param x block x
+         * @param y block y
+         * @param z block z
+         * @return Completed pooled query with all regions in ZYX point, see {@link RegionMap#getRegions(RegionQuery)}
+         */
+        public RegionQuery getRegionsEx(final int x, final int y, final int z) {
+            RegionQuery query;
+            long index;
+            if((index = Region.calcIndex(x, z)) == lastIndex) lastContainer
+                        .getRegions(query = this.query.init(x, y, z));
+
+            else (lastContainer = mapIndex.get(lastIndex = index))
+                        .getRegions(query = this.query.init(x, y, z));
+
+            return query;
+        }
+
+
+        /**
+         * Cache last container and index
+         * @param x block x
+         * @param y block y
+         * @param z block z
+         * @param func Consumer to accept
+         */
+        public void acceptRegionEx(final int x, final int y, final int z, final Consumer<Region> func) {
+            long index;
+            if((index = Region.calcIndex(x, z)) == lastIndex) lastContainer
+                    .acceptRegions(x, y, z, func);
+
+            else (lastContainer = mapIndex.get(lastIndex = index))
+                    .acceptRegions(x, y, z, func);
         }
 
 
@@ -494,6 +538,8 @@ public class RegionMapEx extends RegionMap {
             proxy = null;
             list.resetIfNeed();
             query.resetIfNeed();
+            lastIndex = 1;
+            lastContainer = null;
         }
 
 

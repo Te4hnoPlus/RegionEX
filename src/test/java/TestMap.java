@@ -20,11 +20,11 @@ public class TestMap {
 
             RegionMapEx map = new RegionMapEx(new File("data"));
             RegionMapEx.Context ctx = map.newContext();
-            ctx.ensureLoaded(-512, -512, 1512, 1512);
+            ctx.ensureLoaded(-512, -512, 51_000, 51_000);
 
             int count = 0;
 
-            for (int i = 0; i < 1250; i += 1) {
+            for (int i = 0; i < 50_000; i += 1) {
                 int h = i % 50;
                 Region reg = ctx.createRegion(10 + i, 10 + h, 10 + i, 50 + i, 30 + h, 50 + i);
                 if(printID) System.out.println("NEW: " + reg.id);

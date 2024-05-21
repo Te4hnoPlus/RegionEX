@@ -23,9 +23,15 @@ public class MultiRegionContainer extends RegionContainer{
 
     @Override
     public void getRegions(final RegionQuery query) {
-        for(Region region: regions)
-            if(region.contains(query.getX(), query.getY(), query.getZ()))
-                query.addRegion(region);
+        for(Region region: regions) if(region.contains(query.getX(), query.getY(), query.getZ()))
+            query.addRegion(region);
+    }
+
+
+    @Override
+    public void acceptRegions(final int x, final int y, final int z, final Consumer<Region> func) {
+        for(Region region: regions) if(region.contains(x, y, z))
+            func.accept(region);
     }
 
 

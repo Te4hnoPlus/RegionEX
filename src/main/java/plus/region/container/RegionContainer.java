@@ -35,6 +35,16 @@ public class RegionContainer implements Iterable<Region>{
 
 
     /**
+     * Apply function to all regions in XYZ point
+     * @param x block x
+     * @param y block y
+     * @param z block z
+     * @param func Function to apply
+     */
+    public void acceptRegions(final int x, final int y, final int z, final Consumer<Region> func){}
+
+
+    /**
      * Finds all regions that intersect with region, see {@link RegionMap#getRegions(RegionQuery)}
      * @param region Region to intersect
      * @param query Query (maybe reused)
