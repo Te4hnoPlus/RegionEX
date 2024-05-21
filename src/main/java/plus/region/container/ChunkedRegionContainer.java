@@ -131,8 +131,10 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     @Override
     public void acceptRegions(final int x, final int y, final int z, final Consumer<Region> func) {
-        for (Region[] curRegions : regions) if (curRegions != null)
-            for (Region region : curRegions) if(region.contains(x, y, z)) func.accept(region);
+        Region[] curRegions = regions[y > 255 ? 15 : y > 0 ? y >> 4 : 0];
+        if(curRegions == null) return;
+        for(Region region: curRegions)
+            if(region.contains(x, y, z)) func.accept(region);
     }
 
 
