@@ -1,12 +1,13 @@
 package plus.region.data;
 
 import plus.region.utl.FastExitException;
-
 import java.io.*;
-
 import static plus.region.data.IoUtils.*;
 
 
+/**
+ * Helpful class to manage regions ids
+ */
 public class NextIdMap {
     private static final int[] EMPTY = new int[0];
 
@@ -16,6 +17,9 @@ public class NextIdMap {
     private boolean dirty = false;
 
 
+    /**
+     * @return Next available id
+     */
     public int nextId() {
         dirty = true;
         if (unusedCursor > 0) {
@@ -25,25 +29,41 @@ public class NextIdMap {
     }
 
 
+    /**
+     * @return Current common id
+     */
     public int curId() {
-        return lastId;
+        return lastId-1;
     }
 
 
+    /**
+     * @param id ID of removed region
+     */
     public void free(final int id) {
         dirty = true;
-        if(unusedCursor == unused.length) {
-            unused = grow(unused, unused.length + 5);
+        if(id == curId()) {
+            --lastId;
+        } else {
+            if (unusedCursor == unused.length) {
+                unused = grow(unused, unused.length + 5);
+            }
+            unused[unusedCursor++] = id;
         }
-        unused[unusedCursor++] = id;
     }
 
 
+    /**
+     * @return true if it needs to be saved
+     */
     public boolean isDirty() {
         return dirty;
     }
 
 
+    /**
+     * @param dirty marks if it needs to be saved
+     */
     public void setDirty(final boolean dirty) {
         this.dirty = dirty;
     }
@@ -56,6 +76,11 @@ public class NextIdMap {
     }
 
 
+    /**
+     * @param map NextIdMap to write in stream
+     * @param stream Stream to write
+     * @throws IOException if write fails
+     */
     public static void writeTo(NextIdMap map, OutputStream stream) throws IOException {
         writeInt(stream, map.lastId);
         int uCursor = map.unusedCursor;
@@ -84,16 +109,13 @@ public class NextIdMap {
 
     public static void readMap(NextIdMap map, File geoDir){
         File file = nextIdFile(geoDir);
-        RegionStream stream = new RegionStream();
         if(!file.exists())return;
-
         FileInputStream os;
         try {
             os = new FileInputStream(file);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-
         try {
             readFrom(map, os);
         } catch (IOException e) {
