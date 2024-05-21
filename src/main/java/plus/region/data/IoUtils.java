@@ -21,7 +21,6 @@ public class IoUtils {
     }
 
 
-
     /**
      * Read and encode short from input stream
      * @return read int (0-65535)
