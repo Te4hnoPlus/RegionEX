@@ -25,7 +25,12 @@ public class NextIdMap {
     }
 
 
-    public void free(int id) {
+    public int curId() {
+        return lastId;
+    }
+
+
+    public void free(final int id) {
         dirty = true;
         if(unusedCursor == unused.length) {
             unused = grow(unused, unused.length + 5);
@@ -39,12 +44,12 @@ public class NextIdMap {
     }
 
 
-    public void setDirty(boolean dirty) {
+    public void setDirty(final boolean dirty) {
         this.dirty = dirty;
     }
 
 
-    private static int[] grow(int[] array, int newSize) {
+    private static int[] grow(final int[] array, final int newSize) {
         int[] newArray = new int[newSize];
         System.arraycopy(array, 0, newArray, 0, array.length);
         return newArray;

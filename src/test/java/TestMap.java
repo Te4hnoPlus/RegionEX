@@ -36,22 +36,20 @@ public class TestMap {
                 if (query.isEmpty()) continue;
 
                 System.out.println("-------[" + query.getX() + ", " + query.getY() + ", " + query.getZ() + "]-----------------------------------------------");
+                int lim = 5;
                 for (Region region : query) {
                     adapter.use(region);
                     adapter.name.set("SELECTED-" + i);
+                    if(--lim <= 0) {
+                        System.out.println("And "+(query.size()-5)+" more...");
+                        break;
+                    }
                     System.out.println(region);
                 }
             }
 
-//            for (Region region : map) {
-//                adapter.use(region);
-//                if (adapter.name.get() == null) {
-//                    System.out.println(region);
-//                }
-//                --count;
-//            }
-
-            System.out.println("COUNT: " + count); // should be 0
+            System.out.println("COUNT: " + count);
+            System.out.println("CID: "+ctx.map().idMap().curId());
 
             map.flushToDisk(null);
 

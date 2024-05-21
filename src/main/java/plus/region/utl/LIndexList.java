@@ -46,6 +46,15 @@ public class LIndexList implements Iterable<Long>{
 
 
     /**
+     * Reset array size if more than effective size (16)
+     */
+    public void resetIfNeed(){
+        size = 0;
+        if(list.length > 16) list = new long[8];
+    }
+
+
+    /**
      * @return long at index
      * throws IndexOutOfBoundsException if the index is out of range
      */
@@ -68,7 +77,7 @@ public class LIndexList implements Iterable<Long>{
     /**
      * Replace first long equal to last element and trim size
      */
-    public void removeSwap(long value) {
+    public void removeSwap(final long value) {
         int i = 0, s;
         if((s = size) == 0) return;
         if(s == 1) {

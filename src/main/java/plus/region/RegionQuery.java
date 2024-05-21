@@ -129,6 +129,19 @@ public class RegionQuery implements Iterable<Region>{
     }
 
 
+    /**
+     * Reset RegionQuery state and trim to effective size if needed
+     */
+    public void resetIfNeed() {
+        if(size == 0){
+            if(regions.length > 8) regions = EMPTY;
+        } else {
+            if(regions.length > 8) regions = EMPTY;
+            else clear();
+        }
+    }
+
+
     @Override
     public Itr iterator() {
         return new Itr(this.regions, this.size);

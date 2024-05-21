@@ -1,16 +1,17 @@
 package plus.region;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongPredicate;
 import plus.region.data.IoUtils;
 import plus.region.data.NextIdMap;
 import plus.region.data.RegionStream;
 import plus.region.utl.LIndexList;
+import plus.region.utl.RegionConsumerProxy;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 
 /**
@@ -115,15 +116,7 @@ public class RegionMapEx extends RegionMap {
             }
             else list.add(index);
         }
-        map.keySet().removeIf(new LongPredicate() {
-            @Override
-            public boolean test(long value) {
-                boolean res = temp.contains(Region.chunkIndexToGeoIndex(value));
-                if(!res)
-                    System.out.println("NENE: "+value);
-                return res;
-            }
-        });
+        map.keySet().removeIf(value -> temp.contains(Region.chunkIndexToGeoIndex(value)));
     }
 
 
@@ -268,17 +261,24 @@ public class RegionMapEx extends RegionMap {
 
         if(dirtyGeo.isEmpty())return;
 
-        LongOpenHashSet prev = dirtyGeo;
+        final LongOpenHashSet prev = dirtyGeo;
         dirtyGeo = new LongOpenHashSet();
 
         if(geoDir == null) return;
 
         GeoSaveQuery query = null;
+        final LIndexList list = new LIndexList();
+        final LIndexList.Itr itr = list.iterator();
+        final RegionConsumerProxy proxy = new RegionConsumerProxy(null);
         for (long index: prev){
             if(query == null) query =  new GeoSaveQuery(index, geoDir);
             else              query.editRegion(index);
 
-            getRegions(query.areaToSave, query);
+            query.clear();
+            Region.computeIndexes(list, query.areaToSave);
+            itr.reset();
+            proxy.init(query::add);
+            while (itr.hasNext()) map.get(itr.nextLong()).acceptRegions(proxy);
 
             if(query.isEmpty()) {
                 long remove = query.index;
@@ -306,6 +306,7 @@ public class RegionMapEx extends RegionMap {
         private final LIndexList list = new LIndexList();
         private final RegionQuery query = new RegionQuery();
         private final RegionMapEx map;
+        private RegionConsumerProxy proxy;
 
         public Context(final RegionMapEx map) {
             this.map = map;
@@ -384,6 +385,44 @@ public class RegionMapEx extends RegionMap {
 
 
         /**
+         * Accept operation to all regions, intersected with check, see {@link RegionMap#acceptRegions(Region, LIndexList, RegionQuery, RegionConsumerProxy)}
+         * @param check Region to intersect
+         * @param func Consumer to accept
+         */
+        public void acceptRegions(final Region check, final RegionConsumerProxy func){
+            map.acceptRegions(check, list, query, func.parent());
+        }
+
+
+        /**
+         * Accept operation to all regions, intersected with check, see {@link RegionMap#acceptRegions(Region, LIndexList, RegionQuery, Consumer)}
+         * @param check Region to intersect
+         * @param func Consumer to accept
+         */
+        public void acceptRegions(final Region check, final Consumer<Region> func){
+            map.acceptRegions(check, list, query, func);
+        }
+
+
+        /**
+         * Accept operation to all regions, see {@link RegionMap#acceptRegions(RegionConsumerProxy)}
+         * @param func Consumer to accept
+         */
+        public void acceptRegions(RegionConsumerProxy func){
+            map.acceptRegions(func);
+        }
+
+
+        /**
+         * Accept operation to all regions, see {@link RegionMap#acceptRegions(Consumer)}
+         * @param func Consumer to accept
+         */
+        public void acceptRegions(Consumer<Region> func){
+            map.acceptRegions(taskProxy(func));
+        }
+
+
+        /**
          * @param region Region to intersect
          * @return Completed pooled query with all regions intersecting with region, see {@link RegionMap#getRegions(Region, LIndexList, RegionQuery)}
          */
@@ -445,6 +484,25 @@ public class RegionMapEx extends RegionMap {
          */
         public LIndexList list(){
             return list;
+        }
+
+
+        /**
+         * Reset all cached data and allocated memory for sub-items if needed
+         */
+        public void resetIfNeed(){
+            proxy = null;
+            list.resetIfNeed();
+            query.resetIfNeed();
+        }
+
+
+        /**
+         * Make region task proxy from func. Reuse proxy if can
+         * @param func func to proxy
+         */
+        public RegionConsumerProxy taskProxy(Consumer<Region> func){
+            return proxy == null? proxy = new RegionConsumerProxy(func) : proxy.init(func);
         }
     }
 

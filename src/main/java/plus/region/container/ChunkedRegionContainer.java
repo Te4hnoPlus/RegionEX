@@ -1,5 +1,6 @@
 package plus.region.container;
 
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import plus.region.Region;
 import plus.region.RegionQuery;
 import java.util.Iterator;
@@ -156,38 +157,32 @@ public class ChunkedRegionContainer extends RegionContainer{
 
 
     public static class Itr implements Iterator<Region> {
+        private final IntOpenHashSet visited = new IntOpenHashSet();
         private final Region[][] regions;
         private int chunkIndex, regionIndex;
-        private Region[] curChunk;
-        private Region next;
+        Region next;
 
         public Itr(final Region[][] regions) {
             this.regions = regions;
-            this.curChunk = regions[0];
-
-            while (curChunk == null){
-                if(++chunkIndex >= regions.length) {
-                    next = null;
-                    return;
-                }
-                curChunk = regions[chunkIndex];
-            }
-
-            next = curChunk[0];
+            findNext();
         }
 
 
         private void findNext() {
-            if(curChunk.length == regionIndex){
-                for (;chunkIndex < regions.length;++chunkIndex)
-                    if(regions[chunkIndex] != null){
-                        regionIndex = 0;
-                        next = regions[chunkIndex++][0];
-                        return;
+            for (;chunkIndex < regions.length;++chunkIndex) {
+                final Region[] curRegions = regions[chunkIndex];
+                if (curRegions != null){
+                    for (;regionIndex < curRegions.length;++regionIndex) {
+                        final Region region = curRegions[regionIndex];
+                        if (visited.add(region.id)) {
+                            next = region;
+                            return;
+                        }
                     }
-                next = null;
-            } else
-                next = curChunk[regionIndex++];
+                }
+                regionIndex = 0;
+            }
+            next = null;
         }
 
 
