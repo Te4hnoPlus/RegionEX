@@ -1,12 +1,8 @@
 package plus.region.data;
 
-import plus.region.Region;
 import plus.region.utl.FastExitException;
-
 import java.io.*;
-import java.util.Iterator;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 
 /**
@@ -168,9 +164,9 @@ public class IoUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        FileOutputStream os = null;
+        OutputStream os = null;
         try {
-            os = new FileOutputStream(file);
+            os = new ChunkedFileOutputStream(256, file);
             task.accept(os);
         } catch (IOException e) {
             throw new RuntimeException(e);
