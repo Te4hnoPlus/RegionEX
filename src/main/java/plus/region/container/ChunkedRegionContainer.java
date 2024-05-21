@@ -25,9 +25,11 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     public ChunkedRegionContainer(final Region... regions){
         this();
-        for (Region region : regions)
-            for(int y = region.minY; y <= region.maxY; y+=16)
+        for (Region region : regions) {
+            final int maxY = clamp15(region.maxY);
+            for (int y = region.minY; y < maxY; y += 16)
                 addToIndex(y >> 4, region);
+        }
     }
 
 
@@ -40,8 +42,8 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     @Override
     public RegionContainer addRegion(final Region region) {
-        final int maxY = region.maxY & 15;
-        for(int y = region.minY; y <= maxY; y+=16)
+        final int maxY = clamp15(region.maxY);
+        for(int y = region.minY; y < maxY; y+=16)
             addToIndex(y >> 4, region);
         return this;
     }
@@ -49,8 +51,8 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     @Override
     public RegionContainer removeRegion(final Region region) {
-        final int maxY = region.maxY & 15;
-        for(int y = region.minY; y <= maxY; y+=16)
+        final int maxY = clamp15(region.maxY);
+        for(int y = region.minY; y < maxY; y+=16)
             removeFromIndex(y >> 4, region);
 
         //todo if size == 4 use MultiRegionContainer
@@ -100,8 +102,8 @@ public class ChunkedRegionContainer extends RegionContainer{
 
     @Override
     public void getRegions(final Region region, final RegionQuery query) {
-        final int maxY = region.maxY & 15;
-        for(int y = region.minY; y <= maxY; y+=16){
+        final int maxY = clamp15(region.maxY);
+        for(int y = region.minY; y < maxY; y+=16){
             final Region[] curRegions;
             if((curRegions = regions[y >> 4]) == null) continue;
             for(Region curRegion: curRegions)
@@ -143,6 +145,13 @@ public class ChunkedRegionContainer extends RegionContainer{
         }
         builder.setCharAt(builder.length() - 1, '>');
         return builder.toString();
+    }
+
+
+    private static int clamp15(int posY){
+        if(posY < 0) posY = 0;
+        if(posY > 255) posY = 255;
+        return posY | 15;
     }
 
 

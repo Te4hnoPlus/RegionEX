@@ -190,6 +190,15 @@ public class RegionMap implements Iterable<Region>{
     }
 
 
+    public int calcRegionCount(){
+        IntOpenHashSet set = new IntOpenHashSet();
+        for (Long2ObjectMap.Entry<RegionContainer> entry : map.long2ObjectEntrySet())
+            for (Region region : entry.getValue())
+                set.add(region.id);
+        return set.size();
+    }
+
+
     public static class Itr implements Iterator<Region> {
         private final ObjectIterator<Long2ObjectMap.Entry<RegionContainer>> iter;
         private final IntOpenHashSet set;

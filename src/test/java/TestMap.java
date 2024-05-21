@@ -24,7 +24,7 @@ public class TestMap {
 
             int count = 0;
 
-            for (int i = 0; i < 1250; i += 37) {
+            for (int i = 0; i < 1250; i += 1) {
                 int h = i % 50;
                 Region reg = ctx.createRegion(10 + i, 10 + h, 10 + i, 50 + i, 30 + h, 50 + i);
                 if(printID) System.out.println("NEW: " + reg.id);
@@ -76,16 +76,17 @@ public class TestMap {
             int lim = 5;
             for (Region region : query){
                 System.out.println(region);
-                if(--lim < 0) {
+                if(--lim <= 0) {
                     System.out.println("And "+(query.size()-5)+" more...");
                     break;
                 }
             }
         }
+        System.out.println("REGIONS IN POINT: "+ctx.getRegions(350, 50, 350).size());
 
         System.out.println("READ TESTED");
 
-        System.out.println(map.indexLen());
+        System.out.println("REGIONS:"+map.calcRegionCount());
 
         ArrayList<Long> temp = new ArrayList<>();
         temp.add(Region.calcIndex(-1128, -1128));
@@ -93,6 +94,6 @@ public class TestMap {
         map.checkToUnload(ctx.list(), temp.iterator());
         System.out.println(ctx.list());
 
-        System.out.println(map.indexLen());
+        System.out.println("REGIONS:"+map.calcRegionCount());
     }
 }
