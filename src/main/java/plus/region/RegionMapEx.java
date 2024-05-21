@@ -384,9 +384,9 @@ public class RegionMapEx extends RegionMap {
          * @param z block z
          * @return Completed pooled query with all regions in ZYX point, see {@link RegionMap#getRegions(RegionQuery)}
          */
-        public RegionQuery getRegions(final int x, final int y, final int z) {
+        public final RegionQuery getRegions(final int x, final int y, final int z) {
             RegionQuery query;
-            map.getRegions(query = this.query.init(x, y, z));
+            mapIndex.get(Region.calcIndex(x, z)).getRegions(query = this.query.initV(x, y, z));
             return query;
         }
 
@@ -398,14 +398,14 @@ public class RegionMapEx extends RegionMap {
          * @param z block z
          * @return Completed pooled query with all regions in ZYX point, see {@link RegionMap#getRegions(RegionQuery)}
          */
-        public RegionQuery getRegionsEx(final int x, final int y, final int z) {
-            RegionQuery query;
-            long index;
+        public final RegionQuery getRegionsEx(final int x, final int y, final int z) {
+            final RegionQuery query;
+            final long index;
             if((index = Region.calcIndex(x, z)) == lastIndex) lastContainer
-                        .getRegions(query = this.query.init(x, y, z));
+                        .getRegions(query = this.query.initV(x, y, z));
 
             else (lastContainer = mapIndex.get(lastIndex = index))
-                        .getRegions(query = this.query.init(x, y, z));
+                        .getRegions(query = this.query.initV(x, y, z));
 
             return query;
         }
@@ -418,8 +418,8 @@ public class RegionMapEx extends RegionMap {
          * @param z block z
          * @param func Consumer to accept
          */
-        public void acceptRegionEx(final int x, final int y, final int z, final Consumer<Region> func) {
-            long index;
+        public final void acceptRegionEx(final int x, final int y, final int z, final Consumer<Region> func) {
+            final long index;
             if((index = Region.calcIndex(x, z)) == lastIndex) lastContainer
                     .acceptRegions(x, y, z, func);
 
@@ -433,8 +433,20 @@ public class RegionMapEx extends RegionMap {
          * @param check Region to intersect
          * @param func Consumer to accept
          */
-        public void acceptRegions(final Region check, final RegionConsumerProxy func){
+        public final void acceptRegions(final Region check, final RegionConsumerProxy func){
             map.acceptRegions(check, list, query, func.parent());
+        }
+
+
+        /**
+         * Accept operation to all regions in XYZ point, see {@link RegionMap#acceptRegions(int, int, int, Consumer)}
+         * @param x block x
+         * @param y block y
+         * @param z block z
+         * @param func Consumer to accept
+         */
+        public final void acceptRegions(final int x, final int y, final int z, final Consumer<Region> func){
+            mapIndex.get(Region.calcIndex(x, z)).acceptRegions(x, y, z, func);
         }
 
 
@@ -443,7 +455,7 @@ public class RegionMapEx extends RegionMap {
          * @param check Region to intersect
          * @param func Consumer to accept
          */
-        public void acceptRegions(final Region check, final Consumer<Region> func){
+        public final void acceptRegions(final Region check, final Consumer<Region> func){
             map.acceptRegions(check, list, query, func);
         }
 
@@ -452,7 +464,7 @@ public class RegionMapEx extends RegionMap {
          * Accept operation to all regions, see {@link RegionMap#acceptRegions(RegionConsumerProxy)}
          * @param func Consumer to accept
          */
-        public void acceptRegions(RegionConsumerProxy func){
+        public final void acceptRegions(RegionConsumerProxy func){
             map.acceptRegions(func);
         }
 
@@ -461,7 +473,7 @@ public class RegionMapEx extends RegionMap {
          * Accept operation to all regions, see {@link RegionMap#acceptRegions(Consumer)}
          * @param func Consumer to accept
          */
-        public void acceptRegions(Consumer<Region> func){
+        public final void acceptRegions(Consumer<Region> func){
             map.acceptRegions(taskProxy(func));
         }
 

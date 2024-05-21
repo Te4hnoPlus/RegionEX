@@ -25,11 +25,25 @@ public class RegionQuery implements Iterable<Region>{
         this.z = z;
     }
 
-
+    /**
+     * Reinitialize this
+     */
     public RegionQuery init(final int x, final int y, final int z){
         this.x = x;
         this.y = y;
         this.z = z;
+        return this;
+    }
+
+
+    /**
+     * Reinitialize and clear this
+     */
+    public RegionQuery initV(final int x, final int y, final int z){
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.size = 0;
         return this;
     }
 
@@ -161,7 +175,7 @@ public class RegionQuery implements Iterable<Region>{
      * <p>
      * It is recommended to use it repeatedly (if possible) to ensure better performance
      */
-    public static class Itr implements Iterator<Region>, Iterable<Region>{
+    public static final class Itr implements Iterator<Region>, Iterable<Region>{
         private final Region[] regions;
         private final int size;
         private int index = 0;
