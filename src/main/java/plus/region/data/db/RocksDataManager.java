@@ -46,8 +46,8 @@ public class RocksDataManager<T> implements Int2ObjectFunction<T>, AutoCloseable
 
 
     public interface Coder<T> {
-        byte[] code(T obj);
-        T encode(byte[] bytes);
+        byte[] encode(T obj);
+        T decode(byte[] bytes);
     }
 
 
@@ -66,13 +66,13 @@ public class RocksDataManager<T> implements Int2ObjectFunction<T>, AutoCloseable
         byte[] bkey = intToKey(key);
         try {
             if(fastInsert){
-                db.put(bkey, coder.code(value));
+                db.put(bkey, coder.encode(value));
                 return null;
             } else {
                 byte[] prev = db.get(bkey);
-                db.put(bkey, coder.code(value));
+                db.put(bkey, coder.encode(value));
                 if(prev == null) return null;
-                return coder.encode(prev);
+                return coder.decode(prev);
             }
         } catch (RocksDBException e) {
             throw new RuntimeException(e);
@@ -85,7 +85,7 @@ public class RocksDataManager<T> implements Int2ObjectFunction<T>, AutoCloseable
         try {
             byte[] res = db.get(intToKey(key));
             if(res == null) return null;
-            return coder.encode(res);
+            return coder.decode(res);
         } catch (RocksDBException e) {
             throw new RuntimeException(e);
         }
