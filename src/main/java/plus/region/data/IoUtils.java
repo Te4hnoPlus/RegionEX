@@ -122,7 +122,6 @@ public class IoUtils {
     }
 
 
-
     /**
      * Code and write string to output stream
      * @param stream stream to write
@@ -134,6 +133,24 @@ public class IoUtils {
         if(bytes.length > 255) throw new IOException("String too long");
         stream.write(bytes.length);
         stream.write(bytes);
+    }
+
+
+    public static void writeInts(final OutputStream stream, final int[] value, int count) throws IOException {
+        writeShort(stream, count);
+        for(int i = 0; i < count; i++) {
+            writeInt(stream, value[i]);
+        }
+    }
+
+
+    public static int[] readInts(final InputStream stream) throws FastExitException, IOException {
+        int size = readShort(stream);
+        int[] ints = new int[size];
+        for(int i = 0; i < size; i++) {
+            ints[i] = readInt(stream);
+        }
+        return ints;
     }
 
 
