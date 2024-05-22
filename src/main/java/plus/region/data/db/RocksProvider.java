@@ -6,7 +6,7 @@ import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
 
-public class RockedDb<T> implements Int2ObjectFunction<T> {
+public class RocksProvider<T> implements Int2ObjectFunction<T> {
     private final RocksDB db;
     private final Coder<T> coder;
     private final boolean fastInsert;
@@ -16,7 +16,7 @@ public class RockedDb<T> implements Int2ObjectFunction<T> {
     }
 
 
-    public RockedDb(String path, boolean fastInsert, Coder<T> coder) {
+    public RocksProvider(String path, boolean fastInsert, Coder<T> coder) {
         this.fastInsert = fastInsert;
         Options options = new Options();
         options.setCreateIfMissing(true);
