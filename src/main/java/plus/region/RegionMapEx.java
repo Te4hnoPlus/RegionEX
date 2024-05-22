@@ -318,11 +318,11 @@ public class RegionMapEx extends RegionMap {
             if(cur != prev) map.put(index, cur);
         }
         if(prevRegion == null) {
+            onRegionLoaded(region);
+        } else {
             itr.reset();
             final RegionContainer prev, cur = (prev = map.get(index = itr.nextLong())).addRegionOrRelink(prevRegion);
             if(cur != prev) map.put(index, cur);
-        } else {
-            onRegionLoaded(region);
         }
     }
 
