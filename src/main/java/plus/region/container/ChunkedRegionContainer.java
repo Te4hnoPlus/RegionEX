@@ -51,6 +51,21 @@ public class ChunkedRegionContainer extends RegionContainer{
 
 
     @Override
+    public RegionContainer addRegionOrRelink(final Region region){
+        final int maxY = clamp15(region.maxY);
+        int y = region.minY;
+        if(addOrRelink(y >> 4, region)){
+            for(y+=16; y < maxY; y+=16)
+                addToIndex(y >> 4, region);
+        } else {
+            for(y+=16; y < maxY; y+=16)
+                addOrRelink(y >> 4, region);
+        }
+        return this;
+    }
+
+
+    @Override
     public RegionContainer removeRegion(final Region region) {
         final int maxY = clamp15(region.maxY);
         for(int y = region.minY; y < maxY; y+=16)
@@ -60,6 +75,23 @@ public class ChunkedRegionContainer extends RegionContainer{
         if(size() == 0)return RegionContainer.EMPTY;
 
         return this;
+    }
+
+
+    private boolean addOrRelink(final int index, final Region region){
+        Region[] rid;
+        if((rid = regions[index]) == null) {
+            regions[index] = new Region[]{region};
+        } else {
+            for (int i = 0; i < rid.length; i++) {
+                if (rid[i].id == region.id) {
+                    rid[i] = region;
+                    return false;
+                }
+            }
+            regions[index] = Region.expand(rid, region);
+        }
+        return true;
     }
 
 
@@ -126,6 +158,14 @@ public class ChunkedRegionContainer extends RegionContainer{
     public void acceptRegions(final Consumer<Region> func) {
         for (Region[] curRegions : regions) if (curRegions != null)
             for (Region region : curRegions) func.accept(region);
+    }
+
+
+    @Override
+    public Region getRegion(int id) {
+        for (Region[] curRegions : regions) if (curRegions != null)
+            for (Region region : curRegions) if (region.id == id) return region;
+        return null;
     }
 
 

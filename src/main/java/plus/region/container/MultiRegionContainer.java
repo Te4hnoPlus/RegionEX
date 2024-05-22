@@ -58,6 +58,18 @@ public class MultiRegionContainer extends RegionContainer{
 
 
     @Override
+    public RegionContainer addRegionOrRelink(Region region) {
+        Region[] prev = regions;
+        for (int i = 0;i<prev.length;i++)
+            if(prev[i].id == region.id) {
+                prev[i] = region;
+                return this;
+            }
+        return this.addRegion(region);
+    }
+
+
+    @Override
     public RegionContainer removeRegion(final Region region) {
         Region[] newRegions = new Region[regions.length - 1];
         int index = 0;
@@ -80,6 +92,13 @@ public class MultiRegionContainer extends RegionContainer{
     @Override
     public void acceptRegions(final Consumer<Region> func) {
         for (Region region : regions) func.accept(region);
+    }
+
+
+    @Override
+    public Region getRegion(int id) {
+        for(Region region: regions) if(region.id == id) return region;
+        return null;
     }
 
 

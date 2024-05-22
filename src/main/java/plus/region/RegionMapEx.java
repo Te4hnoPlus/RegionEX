@@ -49,6 +49,9 @@ public class RegionMapEx extends RegionMap {
     }
 
 
+    /**
+     * Used on system loadings geo
+     */
     private void ensureLoadedGeo(final LIndexList.Itr itr, final LIndexList list){
         if(geoDir == null) return;
         itr.reset();
@@ -68,12 +71,18 @@ public class RegionMapEx extends RegionMap {
     }
 
 
+    /**
+     * Clear all dirty flags
+     */
     public void clearDirty(){
         dirtyGeo  = new LongOpenHashSet();
         nextIdMap.setDirty(false);
     }
 
 
+    /**
+     * @return true if this has dirty geos or nextIds
+     */
     public boolean hasDirty(){
         return !dirtyGeo.isEmpty() || nextIdMap.isDirty();
     }
@@ -225,12 +234,27 @@ public class RegionMapEx extends RegionMap {
 
 
     /**
-     * Ignore handle modified regions. See {@link RegionMap#add(LIndexList, Region)}
+     * Ignore handle modified regions and relink if needed. See {@link RegionMapEx#ensureLoadedGeo(LIndexList.Itr, LIndexList)}
      * @param list List of indexes to reuse
      * @param region region to add
      */
     protected final void systemAdd(final LIndexList list, final Region region){
-        super.add(list, region);
+        Region.computeIndexes(list, region);
+        LIndexList.Itr itr = list.iterator();
+        long index;
+        Region prevRegion = null;
+        while (itr.hasNext()) {
+            final RegionContainer prev = map.get(index = itr.nextLong());
+            if((prevRegion = prev.getRegion(region.id)) != null) break;
+
+            final RegionContainer cur = prev.addRegion(region);
+            if(cur != prev) map.put(index, cur);
+        }
+        if(prevRegion == null) {
+            itr.reset();
+            final RegionContainer prev, cur = (prev = map.get(index = itr.nextLong())).addRegionOrRelink(prevRegion);
+            if(cur != prev) map.put(index, cur);
+        }
     }
 
 

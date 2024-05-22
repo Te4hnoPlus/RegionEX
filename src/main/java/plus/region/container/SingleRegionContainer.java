@@ -48,6 +48,15 @@ public class SingleRegionContainer extends RegionContainer{
 
 
     @Override
+    public RegionContainer addRegionOrRelink(Region region) {
+        if(this.region.id == region.id)
+            return this.region == region? this : new SingleRegionContainer(region);
+        else
+            return new MultiRegionContainer(this.region, region);
+    }
+
+
+    @Override
     public RegionContainer removeRegion(final Region region) {
         return RegionContainer.EMPTY;
     }
@@ -68,6 +77,12 @@ public class SingleRegionContainer extends RegionContainer{
     @Override
     public Iterator<Region> iterator() {
         return new SingleItr(region);
+    }
+
+
+    @Override
+    public Region getRegion(int id) {
+        return region.id == id ? region : null;
     }
 
 

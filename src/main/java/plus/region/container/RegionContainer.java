@@ -62,6 +62,11 @@ public class RegionContainer implements Iterable<Region>{
     }
 
 
+    public RegionContainer addRegionOrRelink(final Region region){
+        return new SingleRegionContainer(region);
+    }
+
+
     /**
      * Remove region from container. If possible, creates a more optimal container
      * @param region Region to remove
@@ -83,6 +88,30 @@ public class RegionContainer implements Iterable<Region>{
      * @param func Consumer to apply
      */
     public void acceptRegions(final Consumer<Region> func){}
+
+
+    /**
+     * @return Region by id if exists else null
+     */
+    public Region getRegion(int id) {
+        return null;
+    }
+
+
+    /**
+     * @return true if region exists
+     */
+    public final boolean hasRegion(int id) {
+        return getRegion(id) != null;
+    }
+
+
+    /**
+     * @return true if region exists
+     */
+    public final boolean hasRegion(final Region region) {
+        return getRegion(region.id) != null;
+    }
 
 
     @Override
