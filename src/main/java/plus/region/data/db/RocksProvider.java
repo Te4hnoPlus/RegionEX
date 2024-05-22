@@ -1,15 +1,13 @@
 package plus.region.data.db;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
-import org.rocksdb.Options;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
+import org.rocksdb.*;
 
 
-public class RocksProvider<T> implements Int2ObjectFunction<T> {
-    private final RocksDB db;
-    private final Coder<T> coder;
-    private final boolean fastInsert;
+public class RocksProvider<T> implements Int2ObjectFunction<T>, AutoCloseable{
+    protected final RocksDB db;
+    protected final Coder<T> coder;
+    protected final boolean fastInsert;
 
     static {
         RocksDB.loadLibrary();
@@ -20,12 +18,23 @@ public class RocksProvider<T> implements Int2ObjectFunction<T> {
         this.fastInsert = fastInsert;
         Options options = new Options();
         options.setCreateIfMissing(true);
+        options.setCompressionType(CompressionType.ZSTD_COMPRESSION);
+        options.setInfoLogLevel(InfoLogLevel.FATAL_LEVEL);
+        options.setMaxLogFileSize(1024*32);
+        options.setKeepLogFileNum(1);
+
         try {
             db = RocksDB.open(options, path);
         } catch (RocksDBException e) {
             throw new RuntimeException(e);
         }
         this.coder = coder;
+    }
+
+
+    @Override
+    public void close(){
+        db.close();
     }
 
 
@@ -55,6 +64,7 @@ public class RocksProvider<T> implements Int2ObjectFunction<T> {
             } else {
                 byte[] prev = db.get(bkey);
                 db.put(bkey, coder.code(value));
+                if(prev == null) return null;
                 return coder.encode(prev);
             }
         } catch (RocksDBException e) {
@@ -66,7 +76,9 @@ public class RocksProvider<T> implements Int2ObjectFunction<T> {
     @Override
     public T get(int key) {
         try {
-            return coder.encode(db.get(intToKey(key)));
+            byte[] res = db.get(intToKey(key));
+            if(res == null) return null;
+            return coder.encode(res);
         } catch (RocksDBException e) {
             throw new RuntimeException(e);
         }

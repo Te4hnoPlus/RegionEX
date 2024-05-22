@@ -1,11 +1,18 @@
 import org.rocksdb.RocksDBException;
 import plus.region.data.db.RocksProvider;
-
 import java.nio.charset.StandardCharsets;
 
 
 public class TestRocks {
+
     public static void main(String[] args) throws RocksDBException {
+        for (int i=0;i<20;i++){
+            main();
+        }
+    }
+
+
+    public static void main() throws RocksDBException {
         RocksProvider<String> db = new RocksProvider<>("test.db", true, new RocksProvider.Coder<String>() {
             @Override
             public byte[] code(String obj) {
@@ -18,14 +25,15 @@ public class TestRocks {
             }
         });
 
-        for (int i=0;i<10;i++){
+        for (int i=0;i<100;i++){
             db.put(i, "value"+i);
-
         }
 
-        for (int i=0;i<10;i++){
+        for (int i=0;i<100;i++){
             System.out.println(db.get(i));
         }
+
+        db.close();
     }
 
 }
