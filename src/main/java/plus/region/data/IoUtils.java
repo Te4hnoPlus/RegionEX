@@ -10,6 +10,30 @@ import java.util.UUID;
  */
 public class IoUtils {
     /**
+     * Code and write byte (0-255) to output stream
+     * @param stream stream to write
+     * @param value int (0-255) to write
+     * @throws IOException if write fails
+     */
+    public static void writeByte(final OutputStream stream, final int value) throws IOException {
+        stream.write(value);
+    }
+
+
+    /**
+     * Read and encode byte (0-255) from input stream
+     * @return read int (0-255)
+     * @throws IOException if read fails
+     * @throws FastExitException on end of stream
+     */
+    public static int readByte(final InputStream stream) throws IOException, FastExitException{
+        int value = stream.read();
+        if(value == -1) throw FastExitException.INSTANCE;
+        return value;
+    }
+
+
+    /**
      * Code and write short to output stream
      * @param stream stream to write
      * @param value int (0-65535) to write
