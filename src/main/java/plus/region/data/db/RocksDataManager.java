@@ -2,19 +2,23 @@ package plus.region.data.db;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import org.rocksdb.*;
+import plus.region.Region;
 
 
-public class RocksProvider<T> implements Int2ObjectFunction<T>, AutoCloseable{
+/**
+ * Base DataManager for {@link Region}, see {@link Region#getData(Int2ObjectFunction)}
+ */
+public class RocksDataManager<T> implements Int2ObjectFunction<T>, AutoCloseable{
     protected final RocksDB db;
     protected final Coder<T> coder;
-    protected final boolean fastInsert;
+    protected final boolean fastInsert; //should ignore get previous value on put
 
     static {
         RocksDB.loadLibrary();
     }
 
 
-    public RocksProvider(String path, boolean fastInsert, Coder<T> coder) {
+    public RocksDataManager(String path, boolean fastInsert, Coder<T> coder) {
         this.fastInsert = fastInsert;
         Options options = new Options();
         options.setCreateIfMissing(true);
@@ -32,6 +36,9 @@ public class RocksProvider<T> implements Int2ObjectFunction<T>, AutoCloseable{
     }
 
 
+    /**
+     * Call this before destroy this
+     */
     @Override
     public void close(){
         db.close();

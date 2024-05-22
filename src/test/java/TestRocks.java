@@ -1,5 +1,5 @@
 import org.rocksdb.RocksDBException;
-import plus.region.data.db.RocksProvider;
+import plus.region.data.db.RocksDataManager;
 import java.nio.charset.StandardCharsets;
 
 
@@ -13,7 +13,7 @@ public class TestRocks {
 
 
     public static void main() throws RocksDBException {
-        RocksProvider<String> db = new RocksProvider<>("test.db", true, new RocksProvider.Coder<String>() {
+        RocksDataManager<String> db = new RocksDataManager<>("test.db", true, new RocksDataManager.Coder<String>() {
             @Override
             public byte[] code(String obj) {
                 return obj.getBytes(StandardCharsets.UTF_8);
@@ -35,5 +35,4 @@ public class TestRocks {
 
         db.close();
     }
-
 }

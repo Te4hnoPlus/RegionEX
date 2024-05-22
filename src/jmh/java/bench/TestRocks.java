@@ -1,7 +1,7 @@
 package bench;
 
 import org.openjdk.jmh.annotations.*;
-import plus.region.data.db.RocksProvider;
+import plus.region.data.db.RocksDataManager;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 @Fork(value = 1, warmups = 1)
 @Threads(1)
 public class TestRocks {
-    RocksProvider<String> db = new RocksProvider<>("test.db", true, new RocksProvider.Coder<String>() {
+    RocksDataManager<String> db = new RocksDataManager<>("test.db", true, new RocksDataManager.Coder<String>() {
         @Override
         public byte[] code(String obj) {
             return obj.getBytes(StandardCharsets.UTF_8);

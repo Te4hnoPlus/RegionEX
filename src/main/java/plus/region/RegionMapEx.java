@@ -219,6 +219,11 @@ public class RegionMapEx extends RegionMap {
     }
 
 
+    /**
+     * It is not recommended to use manually, {@link RegionMapEx#createRegion(LIndexList, int, int, int, int, int, int)}
+     * @param list List of indexes to reuse
+     * @param region Region to add
+     */
     @Override
     public void add(final LIndexList list, final Region region) {
         onModify(list, region);
@@ -226,10 +231,72 @@ public class RegionMapEx extends RegionMap {
     }
 
 
+    /**
+     * Create new region and choose ID automatically
+     * <p>
+     * It is not recommended to use, {@link RegionMapEx#createRegion(LIndexList, int, int, int, int, int, int)}
+     * @param minX min region block x
+     * @param minY min region block y (0-255)
+     * @param minZ min region block z
+     * @param maxX max region block x
+     * @param maxY max region block y (0-255)
+     * @param maxZ max region block z
+     * @return new region
+     */
+    public Region createRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        return createRegion(new LIndexList(), minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+
+    /**
+     * Create new region and choose ID automatically
+     * @param list List of indexes to reuse
+     * @param minX min region block x
+     * @param minY min region block y (0-255)
+     * @param minZ min region block z
+     * @param maxX max region block x
+     * @param maxY max region block y (0-255)
+     * @param maxZ max region block z
+     * @return new region
+     */
+    public Region createRegion(final LIndexList list, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        if(minY > maxY){
+            int t = minY;
+            minY = maxY;
+            maxY = t;
+        }
+        if(minY < 0)   minY = 0;
+        if(maxY > 255) maxY = 255;
+        Region region = new Region(nextIdMap.nextId(), minX, minY, minZ, maxX, maxY, maxZ);
+        this.add(list, region);
+        return region;
+    }
+
+
+    /**
+     * Free id of removed region
+     * @param list List of indexes to reuse
+     * @param region Region to remove
+     */
     @Override
     public void remove(final LIndexList list, final Region region) {
         onModify(list, region);
-        super.remove(list, region);
+
+        Region.computeIndexes(list, region);
+        LIndexList.Itr itr = list.iterator();
+        long index;
+        boolean freeId = false;
+
+        while (itr.hasNext()) {
+            final RegionContainer prev, cur = (prev = map.get(index = itr.nextLong())).removeRegion(region);
+
+            if(cur != prev) {
+                if(cur == RegionContainer.EMPTY) map.remove(index);
+                else map.put(index, cur);
+                freeId = true;
+            }
+        }
+        if(freeId)nextIdMap.free(region.id);
     }
 
 
@@ -254,8 +321,16 @@ public class RegionMapEx extends RegionMap {
             itr.reset();
             final RegionContainer prev, cur = (prev = map.get(index = itr.nextLong())).addRegionOrRelink(prevRegion);
             if(cur != prev) map.put(index, cur);
+        } else {
+            onRegionLoaded(region);
         }
     }
+
+
+    /**
+     * Called when region loaded from geo file
+     */
+    protected void onRegionLoaded(Region region) {}
 
 
     /**
@@ -366,6 +441,7 @@ public class RegionMapEx extends RegionMap {
          */
         public void remove(final Region region) {
             map.remove(list, region);
+            map.nextIdMap.free(region.id);
         }
 
 
@@ -536,7 +612,7 @@ public class RegionMapEx extends RegionMap {
 
 
         /**
-         * Create new region and choose ID automatically
+         * Create new region and choose ID automatically, see {@link RegionMapEx#createRegion(LIndexList, int, int, int, int, int, int)} )}
          * @param minX min region block x
          * @param minY min region block y (0-255)
          * @param minZ min region block z
@@ -546,16 +622,7 @@ public class RegionMapEx extends RegionMap {
          * @return new region
          */
         public Region createRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-            if(minY > maxY){
-                int t = minY;
-                minY = maxY;
-                maxY = t;
-            }
-            if(minY < 0)   minY = 0;
-            if(maxY > 255) maxY = 255;
-            Region region = new Region(map.nextIdMap.nextId(), minX, minY, minZ, maxX, maxY, maxZ);
-            map.add(list, region);
-            return region;
+            return map.createRegion(list, minX, minY, minZ, maxX, maxY, maxZ);
         }
 
 

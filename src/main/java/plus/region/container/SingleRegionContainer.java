@@ -58,7 +58,8 @@ public class SingleRegionContainer extends RegionContainer{
 
     @Override
     public RegionContainer removeRegion(final Region region) {
-        return RegionContainer.EMPTY;
+        if(this.region.id == region.id) return RegionContainer.EMPTY;
+        return this;
     }
 
 
