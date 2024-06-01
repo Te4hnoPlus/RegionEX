@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class AmRegion {
     //null -> is empty, size = 0 -> is full
     private static final int[][][] FULL_0  = new int[0][0][0];
-    private static final int[][]   FILL_1  = new int[0][0];
+    private static final int[][]   FULL_1 = new int[0][0];
     private static final int[]     FULL_2  = new int[0];
     private static int             FULL_3  = 0xFFFFFFFF;
 
@@ -34,8 +34,14 @@ public class AmRegion {
     }
 
 
-    private static boolean checkFullInts(int[] data){
+    private static boolean isFullInts(int[] data){
         for (int i : data) if (i != FULL_3) return false;
+        return true;
+    }
+
+
+    private static boolean isEmptyInts(int[] data){
+        for (int i : data) if (i != 0) return false;
         return true;
     }
 
@@ -90,7 +96,7 @@ public class AmRegion {
             if((sections = this.sections) == null)this.sections = sections = new int[16][][];
             else if(sections.length == 0) {
                 sections = this.sections = new int[16][][];
-                for (int i = 0; i < 16; i++) sections[i] = FILL_1;
+                for (int i = 0; i < 16; i++) sections[i] = FULL_1;
             }
 
             x = (x & 31) >> 3;
@@ -102,13 +108,8 @@ public class AmRegion {
             } else {
                 if(sub.length == 0){
                     sub = sections[x << 2 | z] = new int[16][];
-                    for (int i=0;i<16;i++){
-                        if(i != y){
-                            int[] nums = new int[16];
-                            fillFull(nums);
-                            sub[i] = nums;
-                        }
-                    }
+                    for (int i = 0; i < 16; i++)
+                        sub[i] = FULL_2;
                 }
             }
             sub[y] = data;
@@ -120,7 +121,7 @@ public class AmRegion {
         }
 
 
-        public void checkFull(){
+        public void trim(){
             if(sections == null || sections.length == 0)return;
             boolean full = true;
             boolean empty = true;
@@ -136,27 +137,34 @@ public class AmRegion {
                     int[] block = section[bs];
                     if(block == null)continue;
 
-                    if(!checkFullInts(block)){
+                    if(!isFullInts(block)){
                         sectFull = false;
+
+                        if(!isEmptyInts(block)){
+                            sectEmpty = false;
+                        } else {
+                            section[bs] = null;
+                        }
                     } else {
-                        sectEmpty = false;
                         section[bs] = FULL_2;
                     }
                 }
                 if(sectFull){
-                    sections[as] = FILL_1;
+                    sections[as] = FULL_1;
                     empty = false;
                 } else {
                     full = false;
                     if(sectEmpty){
-                        //sections[as] = null;
+                        sections[as] = null;
+                    } else {
+                        empty = false;
                     }
                 }
             }
             if(full){
                 sections = FULL_0;
             } else if(empty){
-                //sections = null;
+                sections = null;
             }
         }
 
@@ -181,13 +189,13 @@ public class AmRegion {
     }
 
 
-    public void checkFull(){
+    public void trim(){
         for(Section sect : sections){
             if(sect == null)continue;
-            sect.checkFull();
+            sect.trim();
             while (sect.next != null) {
                 sect = sect.next;
-                sect.checkFull();
+                sect.trim();
             }
         }
     }

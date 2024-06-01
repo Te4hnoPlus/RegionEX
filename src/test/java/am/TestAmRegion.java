@@ -21,7 +21,7 @@ public class TestAmRegion {
             }
         }
 
-        amRegion.checkFull();
+        amRegion.trim();
 
         Random random = new Random(0);
 
