@@ -21,6 +21,7 @@ public class PosSet {
     }
 
 
+    //Cursor: (x & 7) << 1 | (y & 1), Mask: 1 << ((y & 30) << 2 | (z & 7))
     private static boolean containsBlock(int[] data, /*size 16, by blocks in 8 x 8 x 8*/ int x, int y, int z){
         final int mask;
         return ((data[((x & 7) << 1) | (y & 1)]) & (mask = 1 << ((y & 30) << 2 | (z & 7)))) == mask;
@@ -50,7 +51,7 @@ public class PosSet {
 
 
     private static void fillFull(int[] data){
-        for (int i = 0, s = data.length; i < s; i++) data[i] = FULL_3;
+        for (int i = 0, size = data.length; i < size; i++) data[i] = FULL_3;
     }
 
 
@@ -64,7 +65,7 @@ public class PosSet {
         private Section next;
 
         //Local x, y, z
-        private Section(int x, int y, int z) {
+        private Section(final int x, final int y, final int z) {
             this.x = x;
             this.y = (byte) y;
             this.z = z;
@@ -87,27 +88,24 @@ public class PosSet {
         //block x, y, z
         private void setSection(int[] data, int x, int y, int z){
             int[][][] sections;
-            if((sections = this.sections) == null)this.sections = sections = new int[16][][];
+            if((sections = this.sections) == null) this.sections = sections = new int[16][][];
             else if(sections.length == 0) {
                 sections = this.sections = new int[16][][];
                 for (int i = 0; i < 16; i++) sections[i] = FULL_1;
             }
 
-            x = (x & 31) >> 3;
-            y = (y & 31) >> 3;
-            z = (z & 31) >> 3;
+            int[][]         sub = sections[(x = (x & 31) >> 3) << 2 | (z = (z & 31) >> 3)];
+            if(sub == null) sub = sections[x << 2 | z] = new int[16][];
 
-            int[][] sub = sections[x << 2 | z];
-            if(sub == null){
-                sub = sections[x << 2 | z] = new int[16][];
-            } else {
+            else {
+                //Uncompress is full
                 if(sub.length == 0){
                     sub = sections[x << 2 | z] = new int[16][];
-                    for (int i = 0; i < 16; i++)
-                        sub[i] = FULL_2;
+
+                    for (int i = 0; i < 16; i++) sub[i] = FULL_2;
                 }
             }
-            sub[y] = data;
+            sub[(y & 31) >> 3] = data;
         }
 
 
@@ -131,7 +129,7 @@ public class PosSet {
 
                 boolean sectFull = true, sectEmpty = true;
 
-                for (int bs=0; bs < 16; bs++){
+                for (int bs = 0; bs < 16; bs++){
                     final int[] block;
                     if((block = section[bs]) == null) continue;
 
@@ -183,7 +181,7 @@ public class PosSet {
 
 
     public void trim(){
-        for(int i = 0, s = sections.length; i < s; i++){
+        for(int i = 0, size = sections.length; i < size; i++){
             Section sect;
 
             if((sect = sections[i]) == null) continue;
@@ -191,13 +189,10 @@ public class PosSet {
 
             if(sect.isEmpty()){
                 sections[i] = sect.next;
-                --size;
+                --this.size;
             }
 
-            while (sect.next != null) {
-                sect = sect.next;
-                sect.trim();
-            }
+            while (sect.next != null) (sect = sect.next).trim();
         }
     }
 
@@ -260,8 +255,7 @@ public class PosSet {
     protected void reHashIfNeed(){
         if(size < ((sectionsMask + 1) << 1)) return;
 
-        final Section[] prev;
-        final Section[] curSections = this.sections = new Section[(prev = this.sections).length << 1];
+        final Section[] prev, curSections = this.sections = new Section[(prev = this.sections).length << 1];
 
         final int curMask = this.sectionsMask = (this.sectionsMask << 1) | 1;
 
@@ -272,8 +266,7 @@ public class PosSet {
             Section next =   curSections[hash];
             if(next == null) curSections[hash] = sect;
             else {
-                while (next.next != null)
-                    next = next.next;
+                while (next.next != null) next = next.next;
                 next.next = sect;
             }
         }
@@ -328,10 +321,7 @@ public class PosSet {
         if((sect = getSection(x, y, z)) == null) return false;
 
         final int[] section;
-        if((section = sect.sectionBy(x, y, z)) == null) return false;
-        if(section.length == 0) return true;
-
-        return containsBlock(section, x, y, z);
+        return (section = sect.sectionBy(x, y, z)) != null && (section.length == 0 || containsBlock(section, x, y, z));
     }
 
 
