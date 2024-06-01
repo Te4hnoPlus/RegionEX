@@ -10,7 +10,7 @@ public class AmRegion {
     private static final int[][]   FULL_1  = new int[0][0];
     //Used instead of int[]{0xFFFFFFFF, 0xFFFFFFFF, .. 0xFFFFFFFF}
     private static final int[]     FULL_2  = new int[0];
-    private static int             FULL_3  = 0xFFFFFFFF;
+    private static final int       FULL_3  = 0xFFFFFFFF;
 
     private Section[] sections = new Section[16];
     private int sectionsMask = 15, size = 0;
