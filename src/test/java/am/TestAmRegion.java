@@ -29,21 +29,21 @@ public class TestAmRegion {
             for (int y = 0; y < lim; y++) {
                 for (int z = min; z < lim; z++) {
                     try {
-                        if (!amRegion.hasBlock(x, y, z)) {
-                            System.out.println(amRegion.hasBlock(x, y, z));
+                        if (!amRegion.contains(x, y, z)) {
+                            System.out.println(amRegion.contains(x, y, z));
                             throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z);
                         } else {
                             if (random.nextBoolean()) {
                                 try {
-                                    amRegion.remBlock(x, y, z);
+                                    amRegion.remove(x, y, z);
                                 } catch (Exception e) {
-                                    amRegion.remBlock(x, y, z);
+                                    amRegion.remove(x, y, z);
                                     throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z, e);
                                 }
                             }
                         }
                     } catch (Exception e) {
-                        System.out.println(amRegion.hasBlock(x, y, z));
+                        System.out.println(amRegion.contains(x, y, z));
                         throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z, e);
                     }
                 }
@@ -56,7 +56,7 @@ public class TestAmRegion {
             for (int y = 0; y < lim; y++) {
                 for (int z = min; z < lim; z++) {
                     if(random.nextBoolean()) {
-                        if(amRegion.hasBlock(x, y, z)) {
+                        if(amRegion.contains(x, y, z)) {
                             throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z);
                         }
                     }
@@ -70,9 +70,9 @@ public class TestAmRegion {
 
     private static void testPos(AmRegion amRegion, int x, int y, int z) {
         try {
-            boolean prev = amRegion.hasBlock(x, y, z);
-            amRegion.setBlock(x, y, z);
-            boolean cir = amRegion.hasBlock(x, y, z);
+            boolean prev = amRegion.contains(x, y, z);
+            amRegion.set(x, y, z);
+            boolean cir = amRegion.contains(x, y, z);
             if (prev == cir) {
                 throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z);
             }

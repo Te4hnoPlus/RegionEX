@@ -1,12 +1,14 @@
 package plus.region.adv;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 
 
 public class AmRegion {
-    //null -> is empty, size = 0 -> is full
+    //Used instead of int[]{{{0xFFFFFFFF, .. 0xFFFFFFFF}, {0xFFFFFFFF, ..}, ..}, {{0xFFFFFFFF, ..}, ..} ..}
     private static final int[][][] FULL_0  = new int[0][0][0];
-    private static final int[][]   FULL_1 = new int[0][0];
+    //Used instead of int[]{{0xFFFFFFFF, .. 0xFFFFFFFF}, {0xFFFFFFFF, .. 0xFFFFFFFF}, ..}
+    private static final int[][]   FULL_1  = new int[0][0];
+    //Used instead of int[]{0xFFFFFFFF, 0xFFFFFFFF, .. 0xFFFFFFFF}
     private static final int[]     FULL_2  = new int[0];
     private static int             FULL_3  = 0xFFFFFFFF;
 
@@ -18,7 +20,7 @@ public class AmRegion {
     }
 
 
-    private static boolean hasBlock(int[] data, /*size 16, by blocks in 8 x 8 x 8*/ int x, int y, int z){
+    private static boolean containsBlock(int[] data, /*size 16, by blocks in 8 x 8 x 8*/ int x, int y, int z){
         final int mask;
         return ((data[((x & 7) << 1) | (y & 1)]) & (mask = 1 << ((y & 30) << 2 | (z & 7)))) == mask;
     }
@@ -46,29 +48,21 @@ public class AmRegion {
     }
 
 
-    private static void fillFull(int[][][] data){
-        for (int[][] datum : data) fillFull(datum);
-    }
-
-
-    private static void fillFull(int[][] data){
-        for (int[] datum : data) fillFull(datum);
-    }
-
-
     private static void fillFull(int[] data){
         for (int i = 0, s = data.length; i < s; i++) data[i] = FULL_3;
     }
 
 
-    //32 x 32 x 32
+    //Region section of 32 x 32 x 32
     private static final class Section{
         private final int x, z;
         private final byte y;
-        //8x8x8
+        //Sections blocks of size 8 x 8 x 8
         private int[][][] sections = null;
+        //Next section with equal hash
         private Section next;
 
+        //Local x, y, z
         private Section(int x, int y, int z) {
             this.x = x;
             this.y = (byte) y;
@@ -77,18 +71,19 @@ public class AmRegion {
 
 
         //block x, y, z
-        private int[] sectionBy(int x, int y, int z){
-            int[][][] sections;
-            if((sections = this.sections) == null)return null;
-            if(sections.length == 0)return FULL_2;
+        private int[] sectionBy(final int x, final int y, final int z){
+            final int[][][] sections;
+            if((sections = this.sections) == null) return null;
+            if(sections.length == 0) return FULL_2;
 
-            int[][] sub;
-            if((sub = sections[((x & 31) >> 3) << 2 | ((z & 31) >> 3)]) == null)return null;
-            if(sub.length == 0)return FULL_2;
+            final int[][] sub;
+            if((sub = sections[((x & 31) >> 3) << 2 | ((z & 31) >> 3)]) == null) return null;
+            if(sub.length == 0) return FULL_2;
             return sub[(y & 31) >> 3];
         }
 
 
+        //block x, y, z
         private void setSection(int[] data, int x, int y, int z){
             int[][][] sections;
             if((sections = this.sections) == null)this.sections = sections = new int[16][][];
@@ -98,8 +93,9 @@ public class AmRegion {
             }
 
             x = (x & 31) >> 3;
-            z = (z & 31) >> 3;
             y = (y & 31) >> 3;
+            z = (z & 31) >> 3;
+
             int[][] sub = sections[x << 2 | z];
             if(sub == null){
                 sub = sections[x << 2 | z] = new int[16][];
@@ -125,56 +121,49 @@ public class AmRegion {
 
 
         public void trim(){
-            if(sections == null || sections.length == 0)return;
-            boolean full = true;
-            boolean empty = true;
-            for (int as=0; as < 16; as++){
-                int[][] section = sections[as];
-                if(section == null || section.length == 0)continue;
+            if(sections == null || sections.length == 0) return;
+            boolean full = true, empty = true;
 
-                boolean sectFull = true;
-                boolean sectEmpty = true;
+            for (int as = 0; as < 16; as++){
+                final int[][] section = sections[as];
+                if(section == null || section.length == 0) continue;
+
+                boolean sectFull = true, sectEmpty = true;
 
                 for (int bs=0; bs < 16; bs++){
-
-                    int[] block = section[bs];
-                    if(block == null)continue;
+                    final int[] block;
+                    if((block = section[bs]) == null) continue;
 
                     if(!isFullInts(block)){
                         sectFull = false;
 
-                        if(!isEmptyInts(block)){
-                            sectEmpty = false;
-                        } else {
-                            section[bs] = null;
-                        }
-                    } else {
+                        if(!isEmptyInts(block)) sectEmpty = false;
+                        else                    section[bs] = null;
+
+                    } else
                         section[bs] = FULL_2;
-                    }
                 }
+
                 if(sectFull){
                     sections[as] = FULL_1;
                     empty = false;
                 } else {
                     full = false;
-                    if(sectEmpty){
-                        sections[as] = null;
-                    } else {
-                        empty = false;
-                    }
+
+                    if(sectEmpty) sections[as] = null;
+                    else          empty = false;
                 }
             }
-            if(full){
-                sections = FULL_0;
-            } else if(empty){
-                sections = null;
-            }
+
+            if(full)       sections = FULL_0;
+            else if(empty) sections = null;
         }
 
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
             Section section = (Section) o;
             return x == section.x && z == section.z && y == section.y;
         }
@@ -193,10 +182,10 @@ public class AmRegion {
 
 
     public void trim(){
-        for(int i = 0; i < sections.length; i++){
-            Section sect = sections[i];
+        for(int i = 0, s = sections.length; i < s; i++){
+            Section sect;
 
-            if(sect == null)continue;
+            if((sect = sections[i]) == null) continue;
             sect.trim();
 
             if(sect.isEmpty()){
@@ -212,33 +201,78 @@ public class AmRegion {
     }
 
 
-    private void reHashIfNeed(){
-        if(size < (sectionsMask + 1) * 2)return;
+    private static final class RehashItr implements Iterator<Section>, Iterable<Section> {
+        private final Section[] sections;
+        private Section next;
+        private Section next2;
+        private int cursor = 0;
 
-        final Section[] prev = this.sections;
+        private RehashItr(Section[] sections) {
+            this.sections = sections;
+            goToNext();
+            calcNext();
+        }
+
+
+        private void calcNext(){
+            next2 = next;
+            if(next == null)return;
+            if((next = next.next) == null){
+                goToNext();
+            }
+        }
+
+
+        private void goToNext(){
+            while (cursor < sections.length){
+                Section sect = sections[cursor++];
+                if(sect != null){
+                    next = sect;
+                    return;
+                }
+            }
+            next = null;
+        }
+
+
+        @Override
+        public boolean hasNext() {
+            return next2 != null;
+        }
+
+
+        @Override
+        public Section next() {
+            Section result = next2;
+            calcNext();
+            return result;
+        }
+
+
+        @Override
+        public Iterator<Section> iterator() {
+            return this;
+        }
+    }
+
+
+    protected void reHashIfNeed(){
+        if(size < ((sectionsMask + 1) << 1)) return;
+
+        final Section[] prev;
+        final Section[] curSections = this.sections = new Section[(prev = this.sections).length << 1];
+
         final int curMask = this.sectionsMask = (this.sectionsMask << 1) | 1;
 
-        final Section[] curSections = this.sections = new Section[prev.length << 1];
-
-        ArrayList<Section> all = new ArrayList<>(size);
-        for(Section sect : prev){
-            if(sect == null)continue;
-            all.add(sect);
-
-            while (sect.next != null)
-                all.add(sect = sect.next);
-        }
-        for (Section sect : all) {
+        for (Section sect : new RehashItr(prev)) {
             int hash = sectHash(sect.x, sect.y, sect.z) & curMask;
             sect.next = null;
 
-            Section next = curSections[hash];
-            if(next == null){
-                curSections[hash] = sect;
-            } else {
-                while (next.next != null) {
+            Section next =   curSections[hash];
+            if(next == null) curSections[hash] = sect;
+            else {
+                while (next.next != null)
                     next = next.next;
-                }
                 next.next = sect;
             }
         }
@@ -273,7 +307,7 @@ public class AmRegion {
 
         Section next;
         while(true){
-            if(sect.equals(x, (byte) y, z))return sect;
+            if(sect.equals(x, (byte) y, z)) return sect;
 
             if((next = sect.next) == null){
                 ++size;
@@ -288,7 +322,7 @@ public class AmRegion {
     }
 
 
-    public boolean hasBlock(int x, int y, int z){
+    public boolean contains(final int x, final int y, final int z){
         final Section sect;
         if((sect = getSection(x, y, z)) == null) return false;
 
@@ -296,11 +330,11 @@ public class AmRegion {
         if((section = sect.sectionBy(x, y, z)) == null) return false;
         if(section.length == 0) return true;
 
-        return hasBlock(section, x, y, z);
+        return containsBlock(section, x, y, z);
     }
 
 
-    public void setBlock(int x, int y, int z) {
+    public void set(final int x, final int y, final int z) {
         final Section sect;
         if ((sect = getOrCreateSection(x, y, z)).isFull()) return;
 
@@ -316,20 +350,17 @@ public class AmRegion {
     }
 
 
-    public void remBlock(int x, int y, int z) {
+    public void remove(final int x, final int y, final int z) {
         final Section sect;
         if ((sect = getSection(x, y, z)) == null) return;
 
         int[] section;
-
         if ((section = sect.sectionBy(x, y, z)) == null) return;
 
         if (section.length == 0) {
-            section = new int[16];
-            fillFull(section);
+            fillFull(section = new int[16]);
             sect.setSection(section, x, y, z);
         }
-
         remBlock(section, x, y, z);
     }
 }
