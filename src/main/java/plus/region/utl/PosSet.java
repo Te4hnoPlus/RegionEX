@@ -1,9 +1,10 @@
-package plus.region.adv;
+package plus.region.utl;
 
 import java.util.Iterator;
 
 
-public class AmRegion {
+public class PosSet {
+    //Null -> is empty, size = 0 -> is full. This saves a lot of memory for continuous sequences of positions.
     //Used instead of int[]{{{0xFFFFFFFF, .. 0xFFFFFFFF}, {0xFFFFFFFF, ..}, ..}, {{0xFFFFFFFF, ..}, ..} ..}
     private static final int[][][] FULL_0  = new int[0][0][0];
     //Used instead of int[]{{0xFFFFFFFF, .. 0xFFFFFFFF}, {0xFFFFFFFF, .. 0xFFFFFFFF}, ..}

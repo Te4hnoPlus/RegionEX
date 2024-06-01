@@ -1,6 +1,6 @@
 package am;
 
-import plus.region.adv.AmRegion;
+import plus.region.utl.PosSet;
 import java.util.Random;
 
 
@@ -8,7 +8,7 @@ public class TestAmRegion {
 
     public static void main(String[] args) {
 
-        AmRegion amRegion = new AmRegion();
+        PosSet posSet = new PosSet();
 
         int lim = 150;
         int min = -100;
@@ -16,12 +16,12 @@ public class TestAmRegion {
         for (int x = min; x < lim; x++) {
             for (int y = 0; y < lim; y++) {
                 for (int z = min; z < lim; z++) {
-                    testPos(amRegion, x, y, z);
+                    testPos(posSet, x, y, z);
                 }
             }
         }
 
-        amRegion.trim();
+        posSet.trim();
 
         Random random = new Random(0);
 
@@ -29,21 +29,21 @@ public class TestAmRegion {
             for (int y = 0; y < lim; y++) {
                 for (int z = min; z < lim; z++) {
                     try {
-                        if (!amRegion.contains(x, y, z)) {
-                            System.out.println(amRegion.contains(x, y, z));
+                        if (!posSet.contains(x, y, z)) {
+                            System.out.println(posSet.contains(x, y, z));
                             throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z);
                         } else {
                             if (random.nextBoolean()) {
                                 try {
-                                    amRegion.remove(x, y, z);
+                                    posSet.remove(x, y, z);
                                 } catch (Exception e) {
-                                    amRegion.remove(x, y, z);
+                                    posSet.remove(x, y, z);
                                     throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z, e);
                                 }
                             }
                         }
                     } catch (Exception e) {
-                        System.out.println(amRegion.contains(x, y, z));
+                        System.out.println(posSet.contains(x, y, z));
                         throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z, e);
                     }
                 }
@@ -56,7 +56,7 @@ public class TestAmRegion {
             for (int y = 0; y < lim; y++) {
                 for (int z = min; z < lim; z++) {
                     if(random.nextBoolean()) {
-                        if(amRegion.contains(x, y, z)) {
+                        if(posSet.contains(x, y, z)) {
                             throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z);
                         }
                     }
@@ -68,11 +68,11 @@ public class TestAmRegion {
     }
 
 
-    private static void testPos(AmRegion amRegion, int x, int y, int z) {
+    private static void testPos(PosSet posSet, int x, int y, int z) {
         try {
-            boolean prev = amRegion.contains(x, y, z);
-            amRegion.set(x, y, z);
-            boolean cir = amRegion.contains(x, y, z);
+            boolean prev = posSet.contains(x, y, z);
+            posSet.set(x, y, z);
+            boolean cir = posSet.contains(x, y, z);
             if (prev == cir) {
                 throw new RuntimeException("ERROR x=" + x + " y=" + y + " z=" + z);
             }
