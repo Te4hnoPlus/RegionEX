@@ -15,12 +15,12 @@ public class TestRocks {
     public static void main() throws RocksDBException {
         RocksDataManager<String> db = new RocksDataManager<>("test.db", true, new RocksDataManager.Coder<String>() {
             @Override
-            public byte[] code(String obj) {
+            public byte[] encode(String obj) {
                 return obj.getBytes(StandardCharsets.UTF_8);
             }
 
             @Override
-            public String encode(byte[] bytes) {
+            public String decode(byte[] bytes) {
                 return new String(bytes, StandardCharsets.UTF_8);
             }
         });
