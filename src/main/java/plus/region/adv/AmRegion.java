@@ -66,7 +66,7 @@ public class AmRegion {
         private final int x, z;
         private final byte y;
         //8x8x8
-        private int[][][] sections = null; // 16 x 16 x 16
+        private int[][][] sections = null;
         private Section next;
 
         private Section(int x, int y, int z) {
@@ -81,13 +81,11 @@ public class AmRegion {
             int[][][] sections;
             if((sections = this.sections) == null)return null;
             if(sections.length == 0)return FULL_2;
-            x = (x & 31) >> 3;
-            z = (z & 31) >> 3;
-            y = (y & 31) >> 3;
-            int[][] sub = sections[x << 2 | z];
-            if(sub == null)return null;
+
+            int[][] sub;
+            if((sub = sections[((x & 31) >> 3) << 2 | ((z & 31) >> 3)]) == null)return null;
             if(sub.length == 0)return FULL_2;
-            return sub[y];
+            return sub[(y & 31) >> 3];
         }
 
 
@@ -118,6 +116,11 @@ public class AmRegion {
 
         private boolean isFull(){
             return sections != null && sections.length == 0;
+        }
+
+
+        private boolean isEmpty(){
+            return sections == null;
         }
 
 
@@ -190,9 +193,17 @@ public class AmRegion {
 
 
     public void trim(){
-        for(Section sect : sections){
+        for(int i = 0; i < sections.length; i++){
+            Section sect = sections[i];
+
             if(sect == null)continue;
             sect.trim();
+
+            if(sect.isEmpty()){
+                sections[i] = sect.next;
+                --size;
+            }
+
             while (sect.next != null) {
                 sect = sect.next;
                 sect.trim();
@@ -202,21 +213,20 @@ public class AmRegion {
 
 
     private void reHashIfNeed(){
-        if(size <= sectionsMask * 2)return;
+        if(size < (sectionsMask + 1) * 2)return;
 
-        Section[] prev = this.sections;
-        int prevMask = this.sectionsMask;
-        int curMask = this.sectionsMask = (prevMask << 1) | 1;
+        final Section[] prev = this.sections;
+        final int curMask = this.sectionsMask = (this.sectionsMask << 1) | 1;
 
-        Section[] curSections = this.sections = new Section[prev.length << 1];
+        final Section[] curSections = this.sections = new Section[prev.length << 1];
 
-        ArrayList<Section> all = new ArrayList<>();
+        ArrayList<Section> all = new ArrayList<>(size);
         for(Section sect : prev){
             if(sect == null)continue;
             all.add(sect);
-            while (sect.next != null) {
+
+            while (sect.next != null)
                 all.add(sect = sect.next);
-            }
         }
         for (Section sect : all) {
             int hash = sectHash(sect.x, sect.y, sect.z) & curMask;
@@ -237,14 +247,11 @@ public class AmRegion {
 
     //block x, y, z
     private Section getSection(int x, int y, int z){
-        x >>= 5;
-        y >>= 5;
-        z >>= 5;
+        Section sect;
+        if((sect = sections[sectHash(x >>= 5, y >>= 5, z >>= 5) & sectionsMask]) == null) return null;
 
-        Section sect = sections[sectHash(x, y, z) & sectionsMask];
-        if(sect == null)return null;
         while(sect != null){
-            if(sect.equals(x, (byte) y, z))return sect;
+            if(sect.equals(x, (byte) y, z)) return sect;
             sect = sect.next;
         }
         return null;
@@ -252,12 +259,9 @@ public class AmRegion {
 
 
     private Section getOrCreateSection(int x, int y, int z){
-        x >>= 5;
-        y >>= 5;
-        z >>= 5;
-
         final int hash;
-        Section sect = sections[hash = (sectHash(x, y, z) & sectionsMask)];
+        Section sect = sections[hash = (sectHash(x >>= 5, y >>= 5, z >>= 5) & sectionsMask)];
+
         if(sect == null) {
             ++size;
             sect = sections[hash] = new Section(x, y, z);
@@ -285,45 +289,36 @@ public class AmRegion {
 
 
     public boolean hasBlock(int x, int y, int z){
-        Section sect = getSection(x, y, z);
-        if(sect == null) return false;
-        if(sect.isFull())return true;
+        final Section sect;
+        if((sect = getSection(x, y, z)) == null) return false;
 
-        int[] section = sect.sectionBy(x, y, z);
-        if(section == null)    return false;
-        if(section.length == 0)return true;
+        final int[] section;
+        if((section = sect.sectionBy(x, y, z)) == null) return false;
+        if(section.length == 0) return true;
 
         return hasBlock(section, x, y, z);
     }
 
 
     public void setBlock(int x, int y, int z) {
-        Section sect = getOrCreateSection(x, y, z);
-        if (sect.isFull()) return;
+        final Section sect;
+        if ((sect = getOrCreateSection(x, y, z)).isFull()) return;
 
         int[] section;
 
-        if(sect.isFull()){
+        if ((section = sect.sectionBy(x, y, z)) == null) {
             section = new int[16];
             sect.setSection(section, x, y, z);
-        } else {
-            section = sect.sectionBy(x, y, z);
         }
-
-        if (section == null) {
-            section = new int[16];
-            sect.setSection(section, x, y, z);
-        } else if (section.length == 0) {
-            return;
-        }
+        else if (section.length == 0) return;
 
         setBlock(section, x, y, z);
     }
 
 
     public void remBlock(int x, int y, int z) {
-        final Section sect = getSection(x, y, z);
-        if (sect == null) return;
+        final Section sect;
+        if ((sect = getSection(x, y, z)) == null) return;
 
         int[] section;
 
