@@ -199,11 +199,10 @@ public class PosSet {
 
     private static final class RehashItr implements Iterator<Section>, Iterable<Section> {
         private final Section[] sections;
-        private Section next;
-        private Section next2;
+        private Section next, next2;
         private int cursor = 0;
 
-        private RehashItr(Section[] sections) {
+        private RehashItr(final Section[] sections) {
             this.sections = sections;
             goToNext();
             calcNext();
@@ -211,22 +210,18 @@ public class PosSet {
 
 
         private void calcNext(){
-            next2 = next;
-            if(next == null)return;
-            if((next = next.next) == null){
-                goToNext();
-            }
+            if((next2 = next     ) == null) return;
+            if((next  = next.next) == null) goToNext();
         }
 
 
         private void goToNext(){
-            while (cursor < sections.length){
-                Section sect = sections[cursor++];
-                if(sect != null){
+            Section sect;
+            while (cursor < sections.length)
+                if((sect = sections[cursor++]) != null){
                     next = sect;
                     return;
                 }
-            }
             next = null;
         }
 
@@ -239,7 +234,7 @@ public class PosSet {
 
         @Override
         public Section next() {
-            Section result = next2;
+            final Section result = next2;
             calcNext();
             return result;
         }
